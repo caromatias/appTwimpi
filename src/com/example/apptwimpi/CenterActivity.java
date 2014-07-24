@@ -58,6 +58,7 @@ public class CenterActivity extends Activity implements
 	}
 
 	//mensaje de prueba
+	// holohlohlohlobnbn
 
 	
 	public void onSectionAttached(int number) {
