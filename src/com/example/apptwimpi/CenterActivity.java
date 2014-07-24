@@ -57,11 +57,8 @@ public class CenterActivity extends Activity implements
 						PlaceholderFragment.newInstance(position + 1)).commit();
 	}
 
-	
-	///////hhhhihihihihkjhk
-	
-	
-	/////8888
+	//mensaje de prueba
+
 	
 	public void onSectionAttached(int number) {
 		switch (number) {
