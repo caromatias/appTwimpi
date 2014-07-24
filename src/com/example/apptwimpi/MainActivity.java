@@ -20,7 +20,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
@@ -37,9 +36,26 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.facebook.widget.LoginButton.OnErrorListener;
 
-
+/**
+ * Activity which displays a login screen to the user, offering registration as
+ * well.
+ */
 public class MainActivity extends Activity {
-	
+	/**
+	 * A dummy authentication store containing known user names and passwords.
+	 * TODO: remove after connecting to a real authentication system.
+	 */
+	private static final String[] DUMMY_CREDENTIALS = new String[] {
+			"foo@example.com:hello", "bar@example.com:world" };
+
+	/**
+	 * The default email to populate the email field with.
+	 */
+	public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
+
+	/**
+	 * Keep track of the login task to ensure we can cancel it if requested.
+	 */
 	private UserLoginTask mAuthTask = null;
 
 	// Values for email and password at the time of the login attempt.
@@ -54,7 +70,7 @@ public class MainActivity extends Activity {
 	private TextView mLoginStatusMessageView;
 	UserSessionManager session;
 
-    @Override
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -67,7 +83,7 @@ public class MainActivity extends Activity {
 		// StrictMode.setThreadPolicy(policy);
 
 		// Set up the login form.
-		//mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
+		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
 		mEmailView = (EditText) findViewById(R.id.email);
 		mEmailView.setText(mEmail);
 
@@ -148,27 +164,23 @@ public class MainActivity extends Activity {
 
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+	public void conexionBd() {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-    
-    public void attemptLogin() {
+	}
+
+	/**
+	 * Attempts to sign in or register the account specified by the login form.
+	 * If there are form errors (invalid email, missing fields, etc.), the
+	 * errors are presented and no actual login attempt is made.
+	 */
+	public void attemptLogin() {
 		if (mAuthTask != null) {
 			return;
 		}
@@ -219,8 +231,8 @@ public class MainActivity extends Activity {
 			mAuthTask.execute((Void) null);
 		}
 	}
-    
-    /**
+
+	/**
 	 * Shows the progress UI and hides the login form.
 	 */
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -260,8 +272,12 @@ public class MainActivity extends Activity {
 			mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
 		}
 	}
-    
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+
+	/**
+	 * Represents an asynchronous login/registration task used to authenticate
+	 * the user.
+	 */
+	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			// TODO: attempt authentication against a network service.
@@ -325,7 +341,6 @@ public class MainActivity extends Activity {
 			return exito;
 		}
 
-		
 		@Override
 		protected void onPostExecute(final Boolean success) {
 			mAuthTask = null;
@@ -348,4 +363,10 @@ public class MainActivity extends Activity {
 			showProgress(false);
 		}
 	}
+	@Override
+	   public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    super.onActivityResult(requestCode, resultCode, data);
+	       Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
+	   }
 }
+

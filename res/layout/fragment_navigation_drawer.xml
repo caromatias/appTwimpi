@@ -7,3 +7,5 @@
     android:divider="@android:color/transparent"
     android:dividerHeight="0dp"
     tools:context="com.example.apptwimpi.NavigationDrawerFragment" />
+
+

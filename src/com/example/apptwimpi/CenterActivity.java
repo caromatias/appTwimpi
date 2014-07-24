@@ -56,10 +56,6 @@ public class CenterActivity extends Activity implements
 				.replace(R.id.container,
 						PlaceholderFragment.newInstance(position + 1)).commit();
 	}
-
-	//mensaje de prueba
-	// holohlohlohlobnbn
-
 	
 	public void onSectionAttached(int number) {
 		switch (number) {
