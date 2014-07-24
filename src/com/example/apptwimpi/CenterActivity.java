@@ -57,7 +57,7 @@ public class CenterActivity extends Activity implements
 						PlaceholderFragment.newInstance(position + 1)).commit();
 	}
 	
-	public void onSectionAttached(int number) {
+	/*public void onSectionAttached(int number) {
 		switch (number) {
 		case 1:
 			mTitle = getString(R.string.title_section1);
@@ -69,7 +69,7 @@ public class CenterActivity extends Activity implements
 			mTitle = getString(R.string.title_section3);
 			break;
 		}
-	}
+	}*/
 
 	public void restoreActionBar() {
 		ActionBar actionBar = getActionBar();
@@ -136,12 +136,12 @@ public class CenterActivity extends Activity implements
 			return rootView;
 		}
 
-		@Override
+		/*@Override
 		public void onAttach(Activity activity) {
 			super.onAttach(activity);
 			((CenterActivity) activity).onSectionAttached(getArguments()
 					.getInt(ARG_SECTION_NUMBER));
-		}
+		}*/
 	}
 
 }
