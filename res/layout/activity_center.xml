@@ -11,10 +11,40 @@
          space available using match_parent in both dimensions.
     -->
 
-    <FrameLayout
+    <RelativeLayout
         android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/com_facebook_blue" >
+
+        <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/com_facebook_loginview_text_color" >
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight=".33"
+                android:src="@drawable/tab_uno_cl"
+                android:background="@null" />
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight=".33"
+                android:src="@drawable/tab_tres_or"
+                android:background="@null" />
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight=".33"
+                android:src="@drawable/tab_dos_cl"
+                android:background="@null" />
+        </LinearLayout>
+    </RelativeLayout>
 
     <!--
          android:layout_gravity="start" tells DrawerLayout to treat
@@ -28,7 +58,8 @@
          the container.
     -->
 
-    <fragment
+
+	<fragment
         android:id="@+id/navigation_drawer"
         android:name="com.example.apptwimpi.NavigationDrawerFragment"
         android:layout_width="@dimen/navigation_drawer_width"
