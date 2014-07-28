@@ -1,5 +1,10 @@
 package com.example.apptwimpi;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -12,6 +17,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,6 +76,8 @@ public class MainActivity extends Activity {
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
 	UserSessionManager session;
+	String get_id, get_name, get_gender, get_email, get_birthday, get_locale,
+			get_location;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -143,20 +152,51 @@ public class MainActivity extends Activity {
 					Exception exception) {
 
 				if (session.isOpened()) {
-					Request.executeMeRequestAsync(session,
+					Request.newMeRequest(session,
 							new Request.GraphUserCallback() {
 								@Override
 								public void onCompleted(GraphUser user,
 										Response response) {
 									if (user != null) {
-										Intent i = new Intent(MainActivity.this,
-												CenterActivity.class);
+										get_id = user.getId();
+										get_name = user.getName();
+										get_gender = (String) user
+												.getProperty("gender");
+										get_email = (String) user
+												.getProperty("email");
+										get_birthday = user.getBirthday();
+										get_locale = (String) user
+												.getProperty("locale");
+
+										Log.d("DATOS FACEBOOK",
+												user.getId()
+														+ "; "
+														+ user.getName()
+														+ "; "
+														+ (String) user
+																.getProperty("gender")
+														+ "; "
+														+ (String) user
+																.getProperty("email")
+														+ "; "
+														+ user.getBirthday()
+														+ "; "
+														+ (String) user
+																.getProperty("locale"));
+										
+										Intent i = new Intent(
+												MainActivity.this,
+												DrawableActivity.class);
+										i.putExtra("fbId", get_id);
+										i.putExtra("fbName", get_name);
+										i.putExtra("fbEmail", get_email);
+										i.putExtra("fbLocale", get_locale);
 										startActivity(i);
 									}
 								}
-							});
+							}).executeAsync();
 				} else if (session.isClosed()) {
-					//txtSaludo.setText("!Bienvenido!");
+					// txtSaludo.setText("!Bienvenido!");
 				}
 			}
 		});
@@ -348,7 +388,7 @@ public class MainActivity extends Activity {
 
 			if (success) {
 				// finish();
-				Intent i = new Intent(MainActivity.this, CenterActivity.class);
+				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
 				startActivity(i);
 			} else {
 				mPasswordView
@@ -363,10 +403,11 @@ public class MainActivity extends Activity {
 			showProgress(false);
 		}
 	}
-	@Override
-	   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-	    super.onActivityResult(requestCode, resultCode, data);
-	       Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
-	   }
-}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		Session.getActiveSession().onActivityResult(this, requestCode,
+				resultCode, data);
+	}
+}

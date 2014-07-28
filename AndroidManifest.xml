@@ -45,6 +45,14 @@
             android:name=".CenterActivity"
             android:label="@string/title_activity_center" >
         </activity>
+        <activity
+            android:name=".PrincipalActivity2"
+            android:label="@string/title_activity_principal_activity2" >
+        </activity>
+        <activity
+            android:name=".DrawableActivity"
+            android:label="@string/title_activity_drawable" >
+        </activity>
     </application>
 
 </manifest>
