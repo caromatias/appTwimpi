@@ -1,39 +1,28 @@
 package com.example.apptwimpi;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.facebook.FacebookException;
 import com.facebook.Request;
 import com.facebook.Response;
@@ -64,10 +53,14 @@ public class MainActivity extends Activity {
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
 	private UserLoginTask mAuthTask = null;
+	private UserCreateTask mCreateTask = null;
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
 	private String mPassword;
+
+	// Session Manager Class
+	SessionManager sessionM;
 
 	// UI references.
 	private EditText mEmailView;
@@ -85,7 +78,8 @@ public class MainActivity extends Activity {
 
 		setContentView(R.layout.activity_main);
 
-		session = new UserSessionManager(getApplicationContext());
+		// Session Manager
+		sessionM = new SessionManager(getApplicationContext());
 
 		// StrictMode.ThreadPolicy policy = new
 		// StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -168,30 +162,10 @@ public class MainActivity extends Activity {
 										get_locale = (String) user
 												.getProperty("locale");
 
-										Log.d("DATOS FACEBOOK",
-												user.getId()
-														+ "; "
-														+ user.getName()
-														+ "; "
-														+ (String) user
-																.getProperty("gender")
-														+ "; "
-														+ (String) user
-																.getProperty("email")
-														+ "; "
-														+ user.getBirthday()
-														+ "; "
-														+ (String) user
-																.getProperty("locale"));
-										
-										Intent i = new Intent(
-												MainActivity.this,
-												DrawableActivity.class);
-										i.putExtra("fbId", get_id);
-										i.putExtra("fbName", get_name);
-										i.putExtra("fbEmail", get_email);
-										i.putExtra("fbLocale", get_locale);
-										startActivity(i);
+										sessionM.createLoginSession(get_id,
+												get_email);
+										mCreateTask = new UserCreateTask();
+										mCreateTask.execute((Void) null);
 									}
 								}
 							}).executeAsync();
@@ -353,31 +327,6 @@ public class MainActivity extends Activity {
 						"error:" + error.getLocalizedMessage(),
 						Toast.LENGTH_LONG).show();
 			}
-
-			/*
-			 * // Llamada al servidor web php try { Post post = new Post();
-			 * String server_ip = "http://www.pisodigital.cl//"; JSONArray datos
-			 * = post.getServerData(parametros, server_ip +
-			 * "twimpiweb/login.php"); if (datos != null && datos.length() > 0)
-			 * { JSONObject json_data = datos.getJSONObject(0); int numdevueltos
-			 * = json_data.getInt("success"); if (numdevueltos == 0) {
-			 * Toast.makeText(getBaseContext(),
-			 * "Usuario Correcto...",Toast.LENGTH_SHORT).show(); return true; }
-			 * } else {
-			 * Toast.makeText(getBaseContext(),"Usuario o Contrase�a inv�lida "+
-			 * parametros, Toast.LENGTH_SHORT).show(); return false; } } catch
-			 * (JSONException e) {
-			 * Toast.makeText(getBaseContext(),"Error al conectar con el servidor. "
-			 * ,Toast.LENGTH_SHORT).show(); return false; }
-			 */
-			/*
-			 * for (String credential : DUMMY_CREDENTIALS) { String[] pieces =
-			 * credential.split(":"); if (pieces[0].equals(mEmail)) { // Account
-			 * exists, return true if the password matches. return
-			 * pieces[1].equals(mPassword); } }
-			 */
-
-			// TODO: register the new account here.
 			return exito;
 		}
 
@@ -390,6 +339,7 @@ public class MainActivity extends Activity {
 				// finish();
 				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
 				startActivity(i);
+				finish();
 			} else {
 				mPasswordView
 						.setError(getString(R.string.error_incorrect_password));
@@ -404,10 +354,76 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	public class UserCreateTask extends AsyncTask<Void, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			// TODO: attempt authentication against a network service.
+
+			/*
+			 * try { // Simulate network access. Thread.sleep(2000);
+			 * 
+			 * } catch (InterruptedException e) { return false; }
+			 */
+
+			boolean exito = false;
+			ArrayList parametros = new ArrayList();
+			parametros.add("Id");
+			parametros.add(get_id);
+			parametros.add("nombre");
+			parametros.add(get_name);
+			parametros.add("Correo");
+			parametros.add(get_email);
+
+			JSONParseo jParseo = new JSONParseo();
+
+			String URL = "http://www.pisodigital.cl/twimpiweb/loginfb.php";
+
+			JSONObject json = jParseo.recibir(URL, "post", parametros);
+
+			try {
+				String success = json.getString("success");
+				Log.e("LOG", json.getString("success"));
+				if (success.equals("0")) {
+					exito = true;
+				}
+
+			} catch (Exception error) {
+				exito = false;
+				Toast.makeText(getApplicationContext(),
+						"error:" + error.getLocalizedMessage(),
+						Toast.LENGTH_LONG).show();
+			}
+			return exito;
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean success) {
+			mCreateTask = null;
+			showProgress(false);
+
+			if (success) {
+				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
+				startActivity(i);
+				finish();
+			} else {
+				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
+				startActivity(i);
+				finish();
+			}
+		}
+
+		@Override
+		protected void onCancelled() {
+			mCreateTask = null;
+			showProgress(false);
+		}
+	}
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		Session.getActiveSession().onActivityResult(this, requestCode,
 				resultCode, data);
 	}
+
 }

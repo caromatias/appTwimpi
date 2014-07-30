@@ -31,7 +31,7 @@
         <item>Lugares</item>
         <item>Etiquetas</item>
         <item>Configuración</item>
-        <item>Compartir</item>
+        <item>Cerrar sesion</item>
     </string-array>
     <!-- Lista de iconos de navegacion-->
     <array name="navigation_iconos">

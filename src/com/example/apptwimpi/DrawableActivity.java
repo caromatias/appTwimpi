@@ -3,12 +3,14 @@ package com.example.apptwimpi;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
+import com.facebook.Session;
+
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -22,11 +24,16 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DrawableActivity extends Activity {
+
+	// Session Manager Class
+	SessionManager session;
 	private String[] titulos;
 	private DrawerLayout NavDrawerLayout;
 	private ListView NavList;
@@ -42,6 +49,10 @@ public class DrawableActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_drawable);
+
+		// Session class instance
+		session = new SessionManager(getApplicationContext());
+		session.checkLogin();
 		// Drawer Layout
 		NavDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		// Lista
@@ -70,7 +81,7 @@ public class DrawableActivity extends Activity {
 		NavItms.add(new Item_objct(titulos[4], NavIcons.getResourceId(4, -1)));
 		// Configuracion
 		NavItms.add(new Item_objct(titulos[5], NavIcons.getResourceId(5, -1)));
-		// Share
+		// Cerrar Sesion
 		NavItms.add(new Item_objct(titulos[6], NavIcons.getResourceId(6, -1)));
 		// Declaramos y seteamos nuestrp adaptador al cual le pasamos el array
 		// con los titulos
@@ -105,52 +116,108 @@ public class DrawableActivity extends Activity {
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setHomeButtonEnabled(true);
+
+		// Establecemos que mDrawerToggle declarado anteriormente sea el
+		// DrawerListener
+		NavDrawerLayout.setDrawerListener(mDrawerToggle);
+		// Establecemos que el ActionBar muestre el Boton Home
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+
+		// Establecemos la accion al clickear sobre cualquier item del menu.
+		// De la misma forma que hariamos en una app comun con un listview.
+		NavList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1,
+					int position, long id) {
+				switch (position) {
+				case 6:
+					callFacebookLogout(getApplicationContext());
+					session.logoutUser();
+					break;
+				default:
+					// si no esta la opcion mostrara un toast y nos mandara a
+					// Home
+					Toast.makeText(
+							getApplicationContext(),
+							"Opcion " + titulos[position - 1]
+									+ "no disponible!", Toast.LENGTH_SHORT)
+							.show();
+					position = 1;
+					break;
+				}
+			}
+		});
 		
+		/*
+
 		try {
 			obtenerDatosFacebook();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		*/
+	}
+
+	public static void callFacebookLogout(Context context) {
+		Session session = Session.getActiveSession();
+		if (session != null) {
+
+			if (!session.isClosed()) {
+				session.closeAndClearTokenInformation();
+				// clear your preferences if saved
+			}
+		} else {
+
+			session = new Session(context);
+			Session.setActiveSession(session);
+
+			session.closeAndClearTokenInformation();
+			// clear your preferences if saved
+
+		}
 
 	}
-	
-	public void obtenerDatosFacebook() throws IOException{
+
+	public void obtenerDatosFacebook() throws IOException {
 		final ImageView profile_pic = (ImageView) findViewById(R.id.image_perfil);
 		final Bundle bundle = getIntent().getExtras();
 		TextView nombre = (TextView) findViewById(R.id.nombre_user);
 		nombre.setText(bundle.getString("fbName"));
-		
-		//new DownloadImageTask((ImageView) findViewById(R.id.image_perfil)).execute("https://graph.facebook.com/"+bundle.getString("fbId")+"/picture?type=large");
-		
-		AsyncTask<Void, Void, Bitmap> t = new AsyncTask<Void, Void, Bitmap>(){
-            protected Bitmap doInBackground(Void... p) {
-                Bitmap bm = null;
-                try {
-                    URL aURL = new URL("https://graph.facebook.com/"+bundle.getString("fbId")+"/picture?type=large");
-                    URLConnection conn = aURL.openConnection();
-                    conn.setUseCaches(true);
-                    conn.connect(); 
-                    InputStream is = conn.getInputStream(); 
-                    BufferedInputStream bis = new BufferedInputStream(is); 
-                    bm = BitmapFactory.decodeStream(bis);
-                    bis.close(); 
-                    is.close();
-                } catch (IOException e) { 
-                    e.printStackTrace(); 
-                }
-                return bm;
-            }
 
-            protected void onPostExecute(Bitmap bm){
+		// new DownloadImageTask((ImageView)
+		// findViewById(R.id.image_perfil)).execute("https://graph.facebook.com/"+bundle.getString("fbId")+"/picture?type=large");
 
-                    Drawable drawable = new BitmapDrawable(getResources(), bm);
+		AsyncTask<Void, Void, Bitmap> t = new AsyncTask<Void, Void, Bitmap>() {
+			protected Bitmap doInBackground(Void... p) {
+				Bitmap bm = null;
+				try {
+					URL aURL = new URL("https://graph.facebook.com/"
+							+ bundle.getString("fbId") + "/picture?type=large");
+					URLConnection conn = aURL.openConnection();
+					conn.setUseCaches(true);
+					conn.connect();
+					InputStream is = conn.getInputStream();
+					BufferedInputStream bis = new BufferedInputStream(is);
+					bm = BitmapFactory.decodeStream(bis);
+					bis.close();
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return bm;
+			}
 
-                    profile_pic.setImageDrawable(drawable); 
+			protected void onPostExecute(Bitmap bm) {
 
-            }
-        };
-        t.execute();
+				Drawable drawable = new BitmapDrawable(getResources(), bm);
+
+				profile_pic.setImageDrawable(drawable);
+
+			}
+		};
+		t.execute();
 	}
 
 	@Override
@@ -177,30 +244,30 @@ public class DrawableActivity extends Activity {
 
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-	    ImageView bmImage;
+		ImageView bmImage;
 
-	    public DownloadImageTask(ImageView bmImage) {
-	        this.bmImage = bmImage;
-	    }
+		public DownloadImageTask(ImageView bmImage) {
+			this.bmImage = bmImage;
+		}
 
-	    protected Bitmap doInBackground(String... urls) {
-	        String urldisplay = urls[0];
-	        Bitmap mIcon11 = null;
-	        try {
-	            InputStream in = new java.net.URL(urldisplay).openStream();
-	            mIcon11 = BitmapFactory.decodeStream(in);
-	        } catch (Exception e) {
-	            Log.e("Error", e.getMessage());
-	            e.printStackTrace();
-	        }
-	        return mIcon11;
-	    }
+		protected Bitmap doInBackground(String... urls) {
+			String urldisplay = urls[0];
+			Bitmap mIcon11 = null;
+			try {
+				InputStream in = new java.net.URL(urldisplay).openStream();
+				mIcon11 = BitmapFactory.decodeStream(in);
+			} catch (Exception e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
+			}
+			return mIcon11;
+		}
 
-	    protected void onPostExecute(Bitmap result) {
-	        bmImage.setImageBitmap(result);
-	    }
+		protected void onPostExecute(Bitmap result) {
+			bmImage.setImageBitmap(result);
+		}
 	}
 
 }
