@@ -2,18 +2,21 @@ package com.example.apptwimpi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -23,11 +26,15 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.facebook.FacebookException;
+import com.facebook.HttpMethod;
 import com.facebook.Request;
+import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
+import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.facebook.widget.LoginButton.OnErrorListener;
@@ -71,6 +78,7 @@ public class MainActivity extends Activity {
 	UserSessionManager session;
 	String get_id, get_name, get_gender, get_email, get_birthday, get_locale,
 			get_location;
+	private boolean doubleBackToExitPressedOnce = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -137,14 +145,14 @@ public class MainActivity extends Activity {
 
 			}
 		});
-		authButton.setReadPermissions(Arrays.asList("public_profile", "email"));
+		authButton.setReadPermissions(Arrays.asList("public_profile", "email", "user_friends"));
 
 		authButton.setSessionStatusCallback(new Session.StatusCallback() {
 
 			@Override
 			public void call(Session session, SessionState state,
 					Exception exception) {
-
+				showProgress(true);
 				if (session.isOpened()) {
 					Request.newMeRequest(session,
 							new Request.GraphUserCallback() {
@@ -164,11 +172,17 @@ public class MainActivity extends Activity {
 
 										sessionM.createLoginSession(get_id,
 												get_email);
+										
+										getFriends();
+										
 										mCreateTask = new UserCreateTask();
 										mCreateTask.execute((Void) null);
 									}
 								}
 							}).executeAsync();
+					
+
+					
 				} else if (session.isClosed()) {
 					// txtSaludo.setText("!Bienvenido!");
 				}
@@ -176,6 +190,28 @@ public class MainActivity extends Activity {
 		});
 		// FACEBOOK LOGIN //
 
+	}
+	
+	private void getFriends(){
+	    Session activeSession = Session.getActiveSession();
+	    if(activeSession.getState().isOpened()){
+	        Request friendRequest = Request.newMyFriendsRequest(activeSession, 
+	            new GraphUserListCallback(){
+	                @Override
+	                public void onCompleted(List<GraphUser> users,
+	                        Response response) {
+	                    Log.i("INFO", response.toString());
+	                    for (int i = 0; i < users.size(); i++) {
+	                        Log.e("users", "users " + users.get(i).getName());
+	                    }
+
+	                }
+	        });
+	        Bundle params = new Bundle();
+	        params.putString("fields", "id,name,friends");
+	        friendRequest.setParameters(params);
+	        friendRequest.executeAsync();
+	    }
 	}
 
 	@Override
@@ -302,7 +338,7 @@ public class MainActivity extends Activity {
 			 * } catch (InterruptedException e) { return false; }
 			 */
 			boolean exito = false;
-			ArrayList parametros = new ArrayList();
+			ArrayList<String> parametros = new ArrayList<String>();
 			parametros.add("Usuario");
 			parametros.add(mEmail);
 			parametros.add("Password");
@@ -337,6 +373,8 @@ public class MainActivity extends Activity {
 
 			if (success) {
 				// finish();
+				sessionM.createLoginSession("no_id",
+						mEmail);
 				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
 				startActivity(i);
 				finish();
@@ -366,10 +404,10 @@ public class MainActivity extends Activity {
 			 */
 
 			boolean exito = false;
-			ArrayList parametros = new ArrayList();
-			parametros.add("Id");
+			ArrayList<String> parametros = new ArrayList<String>();
+			parametros.add("Facebook");
 			parametros.add(get_id);
-			parametros.add("nombre");
+			parametros.add("Nombre");
 			parametros.add(get_name);
 			parametros.add("Correo");
 			parametros.add(get_email);
@@ -383,6 +421,8 @@ public class MainActivity extends Activity {
 			try {
 				String success = json.getString("success");
 				Log.e("LOG", json.getString("success"));
+				Log.e("LOG", get_name);
+				Log.e("LOG", get_id);
 				if (success.equals("0")) {
 					exito = true;
 				}
@@ -399,7 +439,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onPostExecute(final Boolean success) {
 			mCreateTask = null;
-			showProgress(false);
+			//showProgress(false);
 
 			if (success) {
 				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
@@ -425,5 +465,28 @@ public class MainActivity extends Activity {
 		Session.getActiveSession().onActivityResult(this, requestCode,
 				resultCode, data);
 	}
+	
+	@Override
+	public void onBackPressed() {
+	    if (doubleBackToExitPressedOnce) {
+	    	Intent startMain = new Intent(Intent.ACTION_MAIN); 
+	    	startMain.addCategory(Intent.CATEGORY_HOME); 
+	    	startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
+	    	startActivity(startMain); 
+	    	System.exit(0);
+	    	finish();
+	    }
+
+	    this.doubleBackToExitPressedOnce = true;
+	    Toast.makeText(this, "Presione atras otra vez para salir", Toast.LENGTH_SHORT).show();
+
+	    new Handler().postDelayed(new Runnable() {
+
+	        @Override
+	        public void run() {
+	            doubleBackToExitPressedOnce=false;                       
+	        }
+	    }, 2000);
+	} 
 
 }

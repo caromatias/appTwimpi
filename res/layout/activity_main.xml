@@ -107,7 +107,7 @@
                 android:layout_marginTop="25dp"
                 android:gravity="center"
                 android:layout_gravity="center_horizontal"
-                fb:login_text="Entra con Facebook"
+                fb:login_text="Ingresar con Facebook"
                 fb:logout_text="Salir" />
 
         </LinearLayout>

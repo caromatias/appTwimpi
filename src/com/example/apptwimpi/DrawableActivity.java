@@ -6,8 +6,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-import com.facebook.Session;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
@@ -30,6 +34,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.Request.GraphUserListCallback;
+import com.facebook.model.GraphObject;
+import com.facebook.model.GraphUser;
+
 public class DrawableActivity extends Activity {
 
 	// Session Manager Class
@@ -44,15 +56,23 @@ public class DrawableActivity extends Activity {
 	private ActionBarDrawerToggle mDrawerToggle;
 	private CharSequence mDrawerTitle;
 	private CharSequence mTitle;
+	HashMap<String, String> user;
+	// /////////////////
+	private String uCorreo;
+	// private TextView uNombre;
+	// private ImageView profile_pic;
+	private String cNombre;
+	private TraeUserTask mGetUserTask = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_drawable);
-
 		// Session class instance
 		session = new SessionManager(getApplicationContext());
 		session.checkLogin();
+		user = session.getUserDetails();
+		uCorreo = user.get(SessionManager.KEY_EMAIL);
 		// Drawer Layout
 		NavDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		// Lista
@@ -137,27 +157,63 @@ public class DrawableActivity extends Activity {
 				default:
 					// si no esta la opcion mostrara un toast y nos mandara a
 					// Home
-					Toast.makeText(
-							getApplicationContext(),
-							"Opcion " + titulos[position - 1]
-									+ "no disponible!", Toast.LENGTH_SHORT)
-							.show();
+					
 					position = 1;
 					break;
 				}
 			}
 		});
-		
-		/*
 
 		try {
 			obtenerDatosFacebook();
+			Session session = Session.getActiveSession();
+			session = new Session(getApplicationContext());
+			Session.setActiveSession(session);
+			getUserData(session);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		*/
+	}
+	
+	
+	private void getUserData(final Session session){
+	    Request request = Request.newMeRequest(session, 
+	        new Request.GraphUserCallback() {
+	        @Override
+	        public void onCompleted(GraphUser user, Response response) {
+	            if(user != null && session == Session.getActiveSession()){
+	                getFriends();
+	            }
+	            if(response.getError() !=null){
+	            	Log.e("Drawable INFO", "NO SESSION");
+	            }
+	        }
+	    });
+	    request.executeAsync();
+	}
+
+	private void getFriends(){
+	    Session activeSession = Session.getActiveSession();
+	    if(activeSession.getState().isOpened()){
+	        Request friendRequest = Request.newMyFriendsRequest(activeSession, 
+	            new GraphUserListCallback(){
+	                @Override
+	                public void onCompleted(List<GraphUser> users,
+	                        Response response) {
+	                    Log.i("Drawable INFO", response.toString());
+	                    for (int i = 0; i < users.size(); i++) {
+	                        Log.e("Drawable users", "users " + users.get(i).getName());
+	                    }
+
+	                }
+	        });
+	        Bundle params = new Bundle();
+	        params.putString("fields", "id,name,friends");
+	        friendRequest.setParameters(params);
+	        friendRequest.executeAsync();
+	    }
 	}
 
 	public static void callFacebookLogout(Context context) {
@@ -182,19 +238,16 @@ public class DrawableActivity extends Activity {
 
 	public void obtenerDatosFacebook() throws IOException {
 		final ImageView profile_pic = (ImageView) findViewById(R.id.image_perfil);
-		final Bundle bundle = getIntent().getExtras();
-		TextView nombre = (TextView) findViewById(R.id.nombre_user);
-		nombre.setText(bundle.getString("fbName"));
-
+		final TextView uNombre = (TextView) findViewById(R.id.nombre_user);
 		// new DownloadImageTask((ImageView)
 		// findViewById(R.id.image_perfil)).execute("https://graph.facebook.com/"+bundle.getString("fbId")+"/picture?type=large");
-
 		AsyncTask<Void, Void, Bitmap> t = new AsyncTask<Void, Void, Bitmap>() {
 			protected Bitmap doInBackground(Void... p) {
 				Bitmap bm = null;
 				try {
 					URL aURL = new URL("https://graph.facebook.com/"
-							+ bundle.getString("fbId") + "/picture?type=large");
+							+ user.get(SessionManager.KEY_NAME)
+							+ "/picture?type=large");
 					URLConnection conn = aURL.openConnection();
 					conn.setUseCaches(true);
 					conn.connect();
@@ -203,21 +256,43 @@ public class DrawableActivity extends Activity {
 					bm = BitmapFactory.decodeStream(bis);
 					bis.close();
 					is.close();
+					// /// GET USER //////
+					ArrayList<String> parametros = new ArrayList<String>();
+					parametros.add("Correo");
+					parametros.add(uCorreo);
+					JSONParseo jParseo = new JSONParseo();
+					String URL = "http://www.pisodigital.cl/twimpiweb/getUser.php";
+					JSONObject json = jParseo.recibir(URL, "post", parametros);
+					cNombre = json.getString("usuario_nombre");
+					Log.e("NOMBRE", json.getString("usuario_nombre"));
+
 				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (JSONException e) {
 					e.printStackTrace();
 				}
 				return bm;
 			}
 
 			protected void onPostExecute(Bitmap bm) {
-
 				Drawable drawable = new BitmapDrawable(getResources(), bm);
-
 				profile_pic.setImageDrawable(drawable);
+				// //// GET USER //////////
+				try {
+					if (cNombre != "") {
+						uNombre.setText(cNombre);
+					} else {
 
+					}
+
+				} catch (Exception error) {
+					uNombre.setText("No hubo conexion");
+				}
 			}
 		};
 		t.execute();
+		// mGetUserTask = new TraeUserTask();
+		// mGetUserTask.execute((Void) null);
 	}
 
 	@Override
@@ -267,6 +342,61 @@ public class DrawableActivity extends Activity {
 
 		protected void onPostExecute(Bitmap result) {
 			bmImage.setImageBitmap(result);
+		}
+	}
+
+	public class TraeUserTask extends AsyncTask<Void, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			// TODO: attempt authentication against a network service.
+
+			/*
+			 * try { // Simulate network access. Thread.sleep(2000);
+			 * 
+			 * } catch (InterruptedException e) { return false; }
+			 */
+
+			boolean exito = false;
+			final TextView uNombre = (TextView) findViewById(R.id.nombre_user);
+			ArrayList<String> parametros = new ArrayList<String>();
+			parametros.add("Correo");
+			parametros.add(uCorreo);
+
+			JSONParseo jParseo = new JSONParseo();
+
+			String URL = "http://www.pisodigital.cl/twimpiweb/getUser.php";
+
+			JSONObject json = jParseo.recibir(URL, "post", parametros);
+
+			try {
+				String cNombre = json.getString("usuario_nombre");
+				Log.e("LOG", json.getString("usuario_nombre"));
+				if (cNombre != "") {
+					exito = true;
+					uNombre.setText(json.getString("usuario_nombre"));
+				} else {
+
+				}
+
+			} catch (Exception error) {
+				uNombre.setText("No hubo conexion");
+			}
+			return exito;
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean success) {
+
+			if (success) {
+
+			} else {
+
+			}
+		}
+
+		@Override
+		protected void onCancelled() {
+			mGetUserTask = null;
 		}
 	}
 
