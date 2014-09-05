@@ -12,6 +12,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -22,7 +23,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -208,7 +211,7 @@ public class MainActivity extends Activity {
 	                }
 	        });
 	        Bundle params = new Bundle();
-	        params.putString("fields", "id,name,friends");
+	        params.putString("fields", "id,name,picture");
 	        friendRequest.setParameters(params);
 	        friendRequest.executeAsync();
 	    }

@@ -53,6 +53,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".EventoActivity"
+            android:label="@string/title_activity_evento" >
+        </activity>
+        <activity
+            android:name=".FBConnectionActivity"
+            android:label="@string/app_name" >
+        </activity>
     </application>
 
 </manifest>

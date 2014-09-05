@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+    <string name="btnFacebookLogin">Entrar con facebook</string>
 
     <string name="app_name">Twimpi</string>
     <string name="title_section1">Section 1</string>
@@ -23,7 +25,7 @@
     <string name="title_activity_main_activity2">MainActivity2</string>
     <string name="title_activity_principal_activity2">PrincipalActivity2</string>
     <string name="title_activity_drawable">DrawableActivity</string>
-    <!-- Lista de titulos de navegacion-->    
+    <!-- Lista de titulos de navegacion -->
     <string-array name="nav_options">
         <item>Perfil</item>
         <item>Favoritos</item>
@@ -33,7 +35,7 @@
         <item>Configuración</item>
         <item>Cerrar sesion</item>
     </string-array>
-    <!-- Lista de iconos de navegacion-->
+    <!-- Lista de iconos de navegacion -->
     <array name="navigation_iconos">
         <item>@drawable/ic_action_user</item>
         <item>@drawable/ic_action_star</item>
@@ -41,7 +43,9 @@
         <item>@drawable/ic_action_place</item>
         <item>@drawable/ic_action_labels</item>
         <item>@drawable/ic_action_settings</item>
-        <item>@drawable/ic_action_share</item>        
-    </array>  
+        <item>@drawable/ic_action_share</item>
+    </array>
+
+    <string name="title_activity_evento">EventoActivity</string>
 
 </resources>

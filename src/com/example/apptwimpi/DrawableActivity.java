@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,14 +31,11 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.facebook.HttpMethod;
 import com.facebook.Request;
+import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
-import com.facebook.Request.GraphUserListCallback;
-import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
 
 public class DrawableActivity extends Activity {
@@ -150,7 +146,7 @@ public class DrawableActivity extends Activity {
 			public void onItemClick(AdapterView<?> arg0, View arg1,
 					int position, long id) {
 				switch (position) {
-				case 6:
+				case 7:
 					callFacebookLogout(getApplicationContext());
 					session.logoutUser();
 					break;
@@ -163,17 +159,8 @@ public class DrawableActivity extends Activity {
 				}
 			}
 		});
-
-		try {
-			obtenerDatosFacebook();
-			Session session = Session.getActiveSession();
-			session = new Session(getApplicationContext());
-			Session.setActiveSession(session);
-			getUserData(session);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		
 		
 	}
 	
@@ -183,8 +170,9 @@ public class DrawableActivity extends Activity {
 	        new Request.GraphUserCallback() {
 	        @Override
 	        public void onCompleted(GraphUser user, Response response) {
-	            if(user != null && session == Session.getActiveSession()){
+	            if(session == Session.getActiveSession()){
 	                getFriends();
+	                Log.e("Drawable INFO", "sosososo");
 	            }
 	            if(response.getError() !=null){
 	            	Log.e("Drawable INFO", "NO SESSION");
