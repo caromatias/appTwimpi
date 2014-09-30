@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.example.apptwimpi.CheckedLinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/selector_filas">
+    <TextView
+              android:id="@+id/titulo"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:textAppearance="@android:style/TextAppearance.Large"
+              android:textColor="#FFDEDEDE"/>
+    <TextView
+            android:id="@+id/descripcion"
+            android:text="descripciones y tal..."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:textColor="#FFC3C3C3"/>
+ 
+</com.example.apptwimpi.CheckedLinearLayout>

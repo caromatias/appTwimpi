@@ -9,11 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -32,10 +35,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
+import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
 
 public class DrawableActivity extends Activity {
@@ -59,6 +64,7 @@ public class DrawableActivity extends Activity {
 	// private ImageView profile_pic;
 	private String cNombre;
 	private TraeUserTask mGetUserTask = null;
+	private ListView miLista;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +152,16 @@ public class DrawableActivity extends Activity {
 			public void onItemClick(AdapterView<?> arg0, View arg1,
 					int position, long id) {
 				switch (position) {
+				case 5:
+					Intent i = new Intent(DrawableActivity.this,
+							EventoActivity.class);
+					startActivity(i);
+					break;
+				case 6:
+					Intent i1 = new Intent(DrawableActivity.this,
+							PruebaDeListView.class);
+					startActivity(i1);
+					break;
 				case 7:
 					callFacebookLogout(getApplicationContext());
 					session.logoutUser();
@@ -153,55 +169,83 @@ public class DrawableActivity extends Activity {
 				default:
 					// si no esta la opcion mostrara un toast y nos mandara a
 					// Home
-					
+
 					position = 1;
 					break;
 				}
 			}
 		});
+
 		
-		
-		
-	}
-	
-	
-	private void getUserData(final Session session){
-	    Request request = Request.newMeRequest(session, 
-	        new Request.GraphUserCallback() {
-	        @Override
-	        public void onCompleted(GraphUser user, Response response) {
-	            if(session == Session.getActiveSession()){
-	                getFriends();
-	                Log.e("Drawable INFO", "sosososo");
-	            }
-	            if(response.getError() !=null){
-	            	Log.e("Drawable INFO", "NO SESSION");
-	            }
-	        }
-	    });
-	    request.executeAsync();
+
+		/*
+		 * ListView lista = (ListView) findViewById(R.id.list_amigos);
+		 * ArrayList<Amigo> arraydir = new ArrayList<Amigo>(); Amigo directivo;
+		 * 
+		 * 
+		 * // Introduzco los datos directivo = new Amigo(
+		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
+		 * , "Arianna Huffington", "Presidenta"); arraydir.add(directivo);
+		 * directivo = new Amigo(
+		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
+		 * , "Princesa Corinna", "CEO"); arraydir.add(directivo); directivo =
+		 * new Amigo(
+		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
+		 * , "Hillary Clinton", "Tesorera"); arraydir.add(directivo); directivo
+		 * = new Amigo(
+		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
+		 * , "Bono el de U2", "Amenizador"); arraydir.add(directivo); directivo
+		 * = new Amigo(
+		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
+		 * , "Carmen de Mairena", "Directora RRHH"); arraydir.add(directivo);
+		 * 
+		 * 
+		 * // Creo el adapter personalizado AdapterAmigo adapter = new
+		 * AdapterAmigo(this, arraydir);
+		 * 
+		 * // Lo aplico lista.setAdapter(adapter);
+		 */
+
 	}
 
-	private void getFriends(){
-	    Session activeSession = Session.getActiveSession();
-	    if(activeSession.getState().isOpened()){
-	        Request friendRequest = Request.newMyFriendsRequest(activeSession, 
-	            new GraphUserListCallback(){
-	                @Override
-	                public void onCompleted(List<GraphUser> users,
-	                        Response response) {
-	                    Log.i("Drawable INFO", response.toString());
-	                    for (int i = 0; i < users.size(); i++) {
-	                        Log.e("Drawable users", "users " + users.get(i).getName());
-	                    }
+	private void getUserData(final Session session) {
+		Request request = Request.newMeRequest(session,
+				new Request.GraphUserCallback() {
+					@Override
+					public void onCompleted(GraphUser user, Response response) {
+						if (session == Session.getActiveSession()) {
+							getFriends();
+							Log.e("Drawable INFO", "sosososo");
+						}
+						if (response.getError() != null) {
+							Log.e("Drawable INFO", "NO SESSION");
+						}
+					}
+				});
+		request.executeAsync();
+	}
 
-	                }
-	        });
-	        Bundle params = new Bundle();
-	        params.putString("fields", "id,name,friends");
-	        friendRequest.setParameters(params);
-	        friendRequest.executeAsync();
-	    }
+	private void getFriends() {
+		Session activeSession = Session.getActiveSession();
+		if (activeSession.getState().isOpened()) {
+			Request friendRequest = Request.newMyFriendsRequest(activeSession,
+					new GraphUserListCallback() {
+						@Override
+						public void onCompleted(List<GraphUser> users,
+								Response response) {
+							Log.i("Drawable INFO", response.toString());
+							for (int i = 0; i < users.size(); i++) {
+								Log.e("Drawable users", "users "
+										+ users.get(i).getName());
+							}
+
+						}
+					});
+			Bundle params = new Bundle();
+			params.putString("fields", "id,name,friends");
+			friendRequest.setParameters(params);
+			friendRequest.executeAsync();
+		}
 	}
 
 	public static void callFacebookLogout(Context context) {

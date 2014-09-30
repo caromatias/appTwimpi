@@ -172,11 +172,14 @@ public class MainActivity extends Activity {
 										get_birthday = user.getBirthday();
 										get_locale = (String) user
 												.getProperty("locale");
+										
+										Session session = Session.getActiveSession();
 
 										sessionM.createLoginSession(get_id,
-												get_email);
+												session.getAccessToken());
 										
 										getFriends();
+										
 										
 										mCreateTask = new UserCreateTask();
 										mCreateTask.execute((Void) null);

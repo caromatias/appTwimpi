@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <string name="btnFacebookLogin">Entrar con facebook</string>
 
+    <string name="btnFacebookLogin">Entrar con facebook</string>
     <string name="app_name">Twimpi</string>
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
@@ -47,5 +46,7 @@
     </array>
 
     <string name="title_activity_evento">EventoActivity</string>
-
+    <string name="title_activity_prueba_de_list_view">PruebaDeListView</string>
+	<string name="create_event">Crear evento</string>
+	
 </resources>
