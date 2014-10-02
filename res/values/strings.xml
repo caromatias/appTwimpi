@@ -45,7 +45,7 @@
         <item>@drawable/ic_action_share</item>
     </array>
 
-    <string name="title_activity_evento">EventoActivity</string>
+    <string name="title_activity_evento">Nuevo Evento</string>
     <string name="title_activity_prueba_de_list_view">PruebaDeListView</string>
 	<string name="create_event">Crear evento</string>
 	
