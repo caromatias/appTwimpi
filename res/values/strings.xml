@@ -48,6 +48,9 @@
     <string name="title_activity_evento">Nuevo Evento</string>
     <string name="title_activity_prueba_de_list_view">PruebaDeListView</string>
     <string name="create_event">Crear evento</string>
-    <string name="title_activity_group">GroupActivity</string>
-
+    <string name="title_activity_group">Grupos</string>
+    <string name="create_group">Crear Grupo</string>
+    <string name="title_create_group">Nombre del grupo:</string>
+	<string name="title_create_group_participantes">Integrantes del grupo:</string>
+	
 </resources>

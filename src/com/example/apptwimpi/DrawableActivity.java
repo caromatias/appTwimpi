@@ -9,12 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -32,16 +30,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
-import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
 
 public class DrawableActivity extends Activity {
@@ -66,7 +63,7 @@ public class DrawableActivity extends Activity {
 	private String cNombre;
 	private TraeUserTask mGetUserTask = null;
 	private ListView miLista;
-	private Button btnGroups;
+	private ImageButton btnGroups;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -208,12 +205,13 @@ public class DrawableActivity extends Activity {
 		 * // Lo aplico lista.setAdapter(adapter);
 		 */
 		
-		btnGroups = (Button)findViewById(R.id.btn_groups);
+		btnGroups = (ImageButton)findViewById(R.id.btn_groups);
 		btnGroups.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent i = new Intent(DrawableActivity.this, GroupActivity.class);
 				startActivity(i);
+				overridePendingTransition(R.anim.left_in, R.anim.left_out);
 			}
 		});
 
