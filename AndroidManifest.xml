@@ -57,6 +57,7 @@
             android:name=".EventoActivity"
             android:label="@string/title_activity_evento"
             android:parentActivityName=".DrawableActivity" >
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -69,6 +70,10 @@
         <activity
             android:name=".PruebaDeListView"
             android:label="@string/title_activity_prueba_de_list_view" >
+        </activity>
+        <activity
+            android:name=".GroupActivity"
+            android:label="@string/title_activity_group" >
         </activity>
     </application>
 

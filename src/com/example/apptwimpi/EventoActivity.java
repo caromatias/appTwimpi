@@ -13,6 +13,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -37,6 +38,7 @@ import com.facebook.model.GraphObject;
 public class EventoActivity extends ListActivity {
 
 	private CreateEventTask mCreateTask = null;
+	private Handler handler;
 	
 	// Session Manager Class
 	SessionManager session;
@@ -51,7 +53,7 @@ public class EventoActivity extends ListActivity {
 	private String date;
 	private String Nombre;
 	private String Descripcion;
-	private int Cupos;
+	private String Cupos;
 	private String asistentes = "";
 	private EditText EditNombre;
 	private EditText EditDescripcion;
@@ -159,6 +161,7 @@ public class EventoActivity extends ListActivity {
 					}
 				});
 		Request.executeBatchAsync(request);
+		handler = new Handler();
 	}
 
 	public void onListItemClick(ListView parent, View v, int position, long id) {
@@ -230,6 +233,61 @@ public class EventoActivity extends ListActivity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.create_event:
+			/*
+			Runnable runnable = new Runnable() {
+	            @Override
+	            public void run() {
+	                handler.post(new Runnable() { // This thread runs in the UI
+	                    @Override
+	                    public void run() {
+	                    	boolean exito = false;
+	            			EditNombre = (EditText)findViewById(R.id.edtNombre);
+	            			Nombre = EditNombre.getText().toString();
+	            			EditDescripcion = (EditText)findViewById(R.id.edtDescripcion);
+	            			Descripcion = EditDescripcion.getText().toString();
+	            			EditCupos = (EditText)findViewById(R.id.edtCupos);
+	            			Cupos = EditCupos.getText().toString();
+	            			ArrayList parametros = new ArrayList();
+	            			parametros.add("NombreEvento");
+	            			parametros.add(Nombre);
+	            			parametros.add("DescripcionEvento");
+	            			parametros.add(Descripcion);
+	            			parametros.add("CuposEvento");
+	            			parametros.add(Cupos);
+	            			parametros.add("FechaEvento");
+	            			parametros.add(date);
+	            			parametros.add("EventoCreador");
+	            			parametros.add(user.get(SessionManager.KEY_NAME));
+	            			parametros.add("Asistentes");
+	            			parametros.add(asistentes);
+	            			
+	            			Log.d("LOG", parametros.toString());
+
+	            			JSONParseo jParseo = new JSONParseo();
+
+	            			String URL = "http://www.pisodigital.cl/twimpiweb/createEvent.php";
+
+	            			JSONObject json = jParseo.recibir(URL, "post", parametros);
+
+	            			try {
+	            				String success = json.getString("success");
+	            				Log.e("LOG", json.getString("success"));
+	            				if (success.equals("0")) {
+	            					exito = true;
+	            				}
+
+	            			} catch (Exception error) {
+	            				exito = false;
+	            				Toast.makeText(getApplicationContext(),
+	            						"error:" + error.getLocalizedMessage(),
+	            						Toast.LENGTH_LONG).show();
+	            			}
+	                    }
+	                });
+	            }
+	        };
+	        new Thread(runnable).start();
+			*/
 			mCreateTask = new CreateEventTask();
 			mCreateTask.execute((Void) null);
 			break;
@@ -253,7 +311,7 @@ public class EventoActivity extends ListActivity {
 			EditDescripcion = (EditText)findViewById(R.id.edtDescripcion);
 			Descripcion = EditDescripcion.getText().toString();
 			EditCupos = (EditText)findViewById(R.id.edtCupos);
-			Cupos = Integer.parseInt(EditCupos.getText().toString());
+			Cupos = EditCupos.getText().toString();
 			ArrayList parametros = new ArrayList();
 			parametros.add("NombreEvento");
 			parametros.add(Nombre);

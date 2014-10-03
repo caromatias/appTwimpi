@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -65,6 +66,7 @@ public class DrawableActivity extends Activity {
 	private String cNombre;
 	private TraeUserTask mGetUserTask = null;
 	private ListView miLista;
+	private Button btnGroups;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -205,6 +207,15 @@ public class DrawableActivity extends Activity {
 		 * 
 		 * // Lo aplico lista.setAdapter(adapter);
 		 */
+		
+		btnGroups = (Button)findViewById(R.id.btn_groups);
+		btnGroups.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(DrawableActivity.this, GroupActivity.class);
+				startActivity(i);
+			}
+		});
 
 	}
 
