@@ -74,11 +74,28 @@
         <activity
             android:name=".GroupActivity"
             android:label="@string/title_activity_group" >
-            
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".DrawableActivity" />
+        </activity>
+        <activity
+            android:name=".CreateGroupActivity"
+            android:label="@string/title_activity_create_group" >
+
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".GroupActivity" />
+        </activity>
+        <activity
+            android:name=".GroupDetailActivity"
+            android:label="@string/title_activity_group_detail">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".GroupActivity" />
         </activity>
     </application>
 

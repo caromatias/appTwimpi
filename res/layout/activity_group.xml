@@ -22,38 +22,25 @@
             android:paddingRight="10dp"
             android:paddingTop="10dp" >
 
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title_create_group"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-
             <EditText
                 android:id="@+id/editText1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10" >
+                android:ems="10"
+                android:hint="@string/buscar_grupo" >
 
                 <requestFocus />
             </EditText>
 
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title_create_group_participantes"
-                android:layout_marginTop="25dp"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-
             <ListView
-                android:id="@android:id/list"
+                android:id="@+id/lista_grupos"
                 android:layout_width="match_parent"
-                android:layout_height="332dp"
+                android:layout_height="450dp"
                 android:layout_marginTop="10dp" >
             </ListView>
-
+            
         </LinearLayout>
+
     </ScrollView>
 
 </RelativeLayout>
