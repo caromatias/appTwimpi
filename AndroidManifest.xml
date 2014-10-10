@@ -91,11 +91,21 @@
         </activity>
         <activity
             android:name=".GroupDetailActivity"
-            android:label="@string/title_activity_group_detail">
+            android:label="@string/title_activity_group_detail" >
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".GroupActivity" />
+        </activity>
+        <activity
+            android:name=".FriendsActivity"
+            android:label="@string/title_activity_friends" >
+            
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".DrawableActivity" />
         </activity>
     </application>
 

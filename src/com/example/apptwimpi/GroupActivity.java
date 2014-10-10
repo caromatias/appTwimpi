@@ -6,27 +6,28 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.NavUtils;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class GroupActivity extends Activity {
+public class GroupActivity extends Activity implements OnRefreshListener {
 
+	private SwipeRefreshLayout swipeLayout;
 	private GetGroupTask mGetTask = null;
 
 	// Session Manager Class
@@ -42,6 +43,13 @@ public class GroupActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        swipeLayout.setOnRefreshListener(this);
+        swipeLayout.setColorScheme(android.R.color.holo_blue_bright, 
+                android.R.color.holo_green_light, 
+                android.R.color.holo_orange_light, 
+                android.R.color.holo_red_light);
 
 		session = new SessionManager(getApplicationContext());
 		session.checkLogin();
@@ -52,6 +60,18 @@ public class GroupActivity extends Activity {
 		mGetTask = new GetGroupTask();
 		mGetTask.execute((Void) null);
 	}
+	
+	@Override public void onRefresh() {
+		mGetTask = new GetGroupTask();
+		mGetTask.execute((Void) null);
+        /*
+		new Handler().postDelayed(new Runnable() {
+            @Override public void run() {
+                swipeLayout.setRefreshing(false);
+            }
+        }, 5000);
+        */
+    }
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -126,6 +146,7 @@ public class GroupActivity extends Activity {
 	                startActivity(i);
 	            }
 	        });	
+			swipeLayout.setRefreshing(false);
 		}
 
 		@Override

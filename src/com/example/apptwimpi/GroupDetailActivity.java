@@ -1,6 +1,7 @@
 package com.example.apptwimpi;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,33 +15,46 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class GroupDetailActivity extends Activity {
 
+	// Session Manager Class
+	SessionManager session;
+	HashMap<String, String> user;
+
 	private ListView lv1;
 	private mGetGroupTask mGetGroupTask = null;
 	private String[] nombreAmigos;
 	private String[] idAmigos;
-	
+	private TextView txt1;
+	private String tituloGrupo;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group_detail);
-
 		
+		session = new SessionManager(getApplicationContext());
+		session.checkLogin();
+		user = session.getUserDetails();
+
+		txt1 = (TextView) findViewById(R.id.txtTituloGrupo);
 		mGetGroupTask = new mGetGroupTask();
 		mGetGroupTask.execute((Void) null);
-		
+
 	}
-	
+
 	public class mGetGroupTask extends AsyncTask<Void, Void, Boolean> {
 		@SuppressLint("NewApi")
 		@Override
@@ -66,16 +80,15 @@ public class GroupDetailActivity extends Activity {
 				idAmigos = new String[json.length()];
 				for (int i = 0; i < json.length(); i++) {
 					JSONObject jsonObject = json.getJSONObject(i);
-					
-					idAmigos[i] = jsonObject.getString("id_integrante");
+
+					idAmigos[i] = jsonObject.getString("grupo_admin");
 					nombreAmigos[i] = jsonObject.getString("usuario_nombre");
+					tituloGrupo = jsonObject.getString("grupo_nombre");
 				}
 
 			} catch (Exception error) {
 				exito = false;
-				Toast.makeText(getApplicationContext(),
-						"error:" + error.getLocalizedMessage(),
-						Toast.LENGTH_LONG).show();
+				Log.d("ERROR FATAL!!!!", "QUEDO LA CAGAAAAAAAA!!! HERMANO WOMP");
 			}
 			return exito;
 		}
@@ -83,17 +96,51 @@ public class GroupDetailActivity extends Activity {
 		@Override
 		protected void onPostExecute(final Boolean success) {
 
-			lv1=(ListView)findViewById(R.id.listView1);
-			ArrayAdapter <String> adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1, nombreAmigos);
+			txt1.setText(tituloGrupo);
+			lv1 = (ListView) findViewById(R.id.listView1);
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+					getApplicationContext(), R.layout.custom_textview,
+					nombreAmigos);
 			lv1.setAdapter(adapter);
 			registerForContextMenu(lv1);
-			
+
 		}
 
 		@Override
 		protected void onCancelled() {
 
 		}
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		if (v.getId() == R.id.listView1) {
+			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+			if (!idAmigos[info.position].equals(user.get(SessionManager.KEY_NAME))) {
+				menu.setHeaderTitle(nombreAmigos[info.position]);
+				String[] menuItems = getResources()
+						.getStringArray(R.array.menu);
+				for (int i = 0; i < menuItems.length; i++) {
+					menu.add(Menu.NONE, i, i, menuItems[i]);
+				}
+			}
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
+				.getMenuInfo();
+		int menuItemIndex = item.getItemId();
+		String[] menuItems = getResources().getStringArray(R.array.menu);
+		String menuItemName = menuItems[menuItemIndex];
+		String listItemName = idAmigos[info.position];
+
+		// TextView text = (TextView)findViewById(R.id.footer);
+		// text.setText(String.format("Selected %s for item %s", menuItemName,
+		// listItemName));
+		return true;
 	}
 
 	@Override

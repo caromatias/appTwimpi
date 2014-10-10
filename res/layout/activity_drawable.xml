@@ -18,11 +18,12 @@
             android:background="@color/com_facebook_loginview_text_color" >
 
             <ImageButton
+                android:id="@+id/btn_friends"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight=".33"
                 android:background="@null"
-                android:src="@drawable/tab_uno_cl" />
+                android:src="@drawable/button_friends" />
 
             <ImageButton
                 android:id="@+id/buttonCentral"
@@ -38,7 +39,7 @@
                 android:layout_height="40dp"
                 android:layout_weight=".33"
                 android:background="@null"
-                android:src="@drawable/tab_dos_cl" />
+                android:src="@drawable/button_groups" />
         </LinearLayout>
 
         

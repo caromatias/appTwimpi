@@ -7,11 +7,15 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
@@ -58,12 +62,17 @@ public class EventoActivity extends ListActivity {
 	private EditText EditNombre;
 	private EditText EditDescripcion;
 	private EditText EditCupos;
+	private View mCreateEventFormView;
+	private View mCreateEventStatusView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_evento);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		mCreateEventFormView = findViewById(R.id.scrollView1);
+		mCreateEventStatusView = findViewById(R.id.refresh_status);
 
 		session = new SessionManager(getApplicationContext());
 		session.checkLogin();
@@ -288,11 +297,53 @@ public class EventoActivity extends ListActivity {
 	        };
 	        new Thread(runnable).start();
 			*/
+			showProgress(true);
 			mCreateTask = new CreateEventTask();
 			mCreateTask.execute((Void) null);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	/**
+	 * Shows the progress UI and hides the login form.
+	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+	private void showProgress(final boolean show) {
+		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+		// for very easy animations. If available, use these APIs to fade-in
+		// the progress spinner.
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+			int shortAnimTime = getResources().getInteger(
+					android.R.integer.config_shortAnimTime);
+
+			mCreateEventStatusView.setVisibility(View.VISIBLE);
+			mCreateEventStatusView.animate().setDuration(shortAnimTime)
+					.alpha(show ? 1 : 0)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							mCreateEventStatusView.setVisibility(show ? View.VISIBLE
+									: View.GONE);
+						}
+					});
+
+			mCreateEventFormView.setVisibility(View.VISIBLE);
+			mCreateEventFormView.animate().setDuration(shortAnimTime)
+					.alpha(show ? 0 : 1)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							mCreateEventFormView.setVisibility(show ? View.GONE
+									: View.VISIBLE);
+						}
+					});
+		} else {
+			// The ViewPropertyAnimator APIs are not available, so simply show
+			// and hide the relevant UI components.
+			mCreateEventStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+			mCreateEventFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+		}
 	}
 	
 	public class CreateEventTask extends AsyncTask<Void, Void, Boolean> {
@@ -355,7 +406,7 @@ public class EventoActivity extends ListActivity {
 
 			if (success) {
 				// finish();
-				//showProgress(false);
+				showProgress(false);
 			} else {
 				//showProgress(false);
 			}

@@ -6,16 +6,13 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.example.apptwimpi.EventoActivity.CreateEventTask;
-import com.facebook.HttpMethod;
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.model.GraphObject;
-
-import android.app.Activity;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
@@ -28,10 +25,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.model.GraphObject;
+
 public class CreateGroupActivity extends ListActivity {
 
 	private CreateGroupTask mCreateTask = null;
-	
+
 	// Session Manager Class
 	SessionManager session;
 	HashMap<String, String> user;
@@ -41,11 +44,16 @@ public class CreateGroupActivity extends ListActivity {
 	private EditText EditNombre;
 	private String Nombre;
 	private String asistentes = "";
+	private View mCreateGroupFormView;
+	private View mCreateGroupStatusView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_group);
+		
+		mCreateGroupFormView = findViewById(R.id.scrollView1);
+		mCreateGroupStatusView = findViewById(R.id.refresh_status);
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -102,7 +110,7 @@ public class CreateGroupActivity extends ListActivity {
 				});
 		Request.executeBatchAsync(request);
 	}
-	
+
 	public void onListItemClick(ListView parent, View v, int position, long id) {
 		// ---toggle the check displayed next to the item---
 		String s = "";
@@ -114,11 +122,12 @@ public class CreateGroupActivity extends ListActivity {
 			if (checked.get(i)) {
 				String item = idAmigos[i];
 				s = s + " " + item;
-				asistentes = asistentes + "" + item+";";
+				asistentes = asistentes + "" + item + ";";
 				/* do whatever you want with the checked item */
 			}
 		}
-		Toast.makeText(this, "Amigos selecionados- " + asistentes, Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Amigos selecionados- " + asistentes,
+				Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
@@ -127,6 +136,7 @@ public class CreateGroupActivity extends ListActivity {
 		getMenuInflater().inflate(R.menu.create_group, menu);
 		return true;
 	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -136,13 +146,55 @@ public class CreateGroupActivity extends ListActivity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		case R.id.create_group:
+			showProgress(true);
 			mCreateTask = new CreateGroupTask();
 			mCreateTask.execute((Void) null);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
+	/**
+	 * Shows the progress UI and hides the login form.
+	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+	private void showProgress(final boolean show) {
+		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+		// for very easy animations. If available, use these APIs to fade-in
+		// the progress spinner.
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+			int shortAnimTime = getResources().getInteger(
+					android.R.integer.config_shortAnimTime);
+
+			mCreateGroupStatusView.setVisibility(View.VISIBLE);
+			mCreateGroupStatusView.animate().setDuration(shortAnimTime)
+					.alpha(show ? 1 : 0)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							mCreateGroupStatusView.setVisibility(show ? View.VISIBLE
+									: View.GONE);
+						}
+					});
+
+			mCreateGroupFormView.setVisibility(View.VISIBLE);
+			mCreateGroupFormView.animate().setDuration(shortAnimTime)
+					.alpha(show ? 0 : 1)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							mCreateGroupFormView.setVisibility(show ? View.GONE
+									: View.VISIBLE);
+						}
+					});
+		} else {
+			// The ViewPropertyAnimator APIs are not available, so simply show
+			// and hide the relevant UI components.
+			mCreateGroupStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+			mCreateGroupFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+		}
+	}
+
 	public class CreateGroupTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
@@ -154,7 +206,7 @@ public class CreateGroupActivity extends ListActivity {
 			 * } catch (InterruptedException e) { return false; }
 			 */
 			boolean exito = false;
-			EditNombre = (EditText)findViewById(R.id.edt_create_group);
+			EditNombre = (EditText) findViewById(R.id.edt_create_group);
 			Nombre = EditNombre.getText().toString();
 			ArrayList parametros = new ArrayList();
 			parametros.add("NombreGrupo");
@@ -163,7 +215,7 @@ public class CreateGroupActivity extends ListActivity {
 			parametros.add(user.get(SessionManager.KEY_NAME));
 			parametros.add("Asistentes");
 			parametros.add(asistentes);
-			
+
 			Log.d("LOG", parametros.toString());
 
 			JSONParseo jParseo = new JSONParseo();
@@ -192,16 +244,19 @@ public class CreateGroupActivity extends ListActivity {
 		protected void onPostExecute(final Boolean success) {
 
 			if (success) {
+				Intent i = new Intent(CreateGroupActivity.this,
+						GroupActivity.class);
+				startActivity(i);
 				// finish();
-				//showProgress(false);
+				showProgress(false);
 			} else {
-				//showProgress(false);
+				// showProgress(false);
 			}
 		}
 
 		@Override
 		protected void onCancelled() {
-			
+
 		}
 	}
 }

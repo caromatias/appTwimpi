@@ -64,6 +64,7 @@ public class DrawableActivity extends Activity {
 	private TraeUserTask mGetUserTask = null;
 	private ListView miLista;
 	private ImageButton btnGroups;
+	private ImageButton btnFriends;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -212,6 +213,16 @@ public class DrawableActivity extends Activity {
 				Intent i = new Intent(DrawableActivity.this, GroupActivity.class);
 				startActivity(i);
 				overridePendingTransition(R.anim.left_in, R.anim.left_out);
+			}
+		});
+		
+		btnFriends = (ImageButton)findViewById(R.id.btn_friends);
+		btnFriends.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(DrawableActivity.this, FriendsActivity.class);
+				startActivity(i);
+				overridePendingTransition(R.anim.right_in, R.anim.right_out);
 			}
 		});
 

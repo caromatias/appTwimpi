@@ -52,9 +52,20 @@
     <string name="create_group">Crear Grupo</string>
     <string name="title_create_group">Nombre del grupo:</string>
     <string name="title_create_group_participantes">Integrantes del grupo:</string>
-    <string name="title_activity_create_group">CreateGroupActivity</string>
-    <string name="title_cgroup_ok">CreateGroupActivity</string>
+    <string name="title_activity_create_group">Nuevo Grupo</string>
+    <string name="title_cgroup_ok">Crear</string>
     <string name="buscar_grupo">Buscar grupo</string>
     <string name="title_activity_group_detail">GroupDetailActivity</string>
+
+    <string-array name="menu">
+        <item>Edit</item>
+        <item>Delete</item>
+        <item>Send</item>
+    </string-array>
+
+    <string name="footer">This is a demo of the ListView. Click and hold on to one of the items above to show the context menu.</string>
+    <string name="txt_refresh">Actualizando#8230;</string>
+    <string name="txt_create">Creando#8230;</string>
+    <string name="title_activity_friends">Amigos</string>
 
 </resources>
