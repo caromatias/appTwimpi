@@ -42,16 +42,61 @@
                 android:src="@drawable/button_groups" />
         </LinearLayout>
 
-        
-        <ListView
-            android:id="@+id/list_amigos"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/lbl_receiver"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp" >
-        </ListView>
-        
-		
+            android:layout_centerVertical="true"
+            android:text="Large Text"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/edt1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/lbl_receiver"
+            android:layout_alignLeft="@+id/lbl_receiver"
+            android:layout_marginBottom="31dp"
+            android:ems="10"
+            android:visibility="gone" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lbl_receiver"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="65dp"
+            android:text="Button"
+            android:visibility="gone" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="80dp"
+            android:background="#ffffff" >
+
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <ListView
+                    android:id="@+id/list_amigos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="50dp" >
+                </ListView>
+            </android.support.v4.widget.SwipeRefreshLayout>
+        </RelativeLayout>
     </RelativeLayout>
     <!-- The navigation drawer -->
 

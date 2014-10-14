@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
@@ -102,7 +101,7 @@ public class GroupActivity extends Activity implements OnRefreshListener {
 		protected Boolean doInBackground(Void... params) {
 
 			boolean exito = false;
-			ArrayList parametros = new ArrayList();
+			ArrayList<String> parametros = new ArrayList<String>();
 			parametros.add("GrupoAdmin");
 			parametros.add(user.get(SessionManager.KEY_NAME));
 

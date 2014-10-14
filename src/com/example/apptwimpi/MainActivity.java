@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,45 +23,33 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.apptwimpi.ServerUtilities;
 import com.facebook.FacebookException;
-import com.facebook.HttpMethod;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
-import com.facebook.model.GraphObject;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.facebook.widget.LoginButton.OnErrorListener;
+import com.google.android.gcm.GCMRegistrar;
 
-/**
- * Activity which displays a login screen to the user, offering registration as
- * well.
- */
+import static com.example.apptwimpi.CommonUtilities.SENDER_ID;
+import static com.example.apptwimpi.CommonUtilities.DISPLAY_MESSAGE_ACTION;
+import static com.example.apptwimpi.CommonUtilities.EXTRA_MESSAGE;
+import static com.example.apptwimpi.CommonUtilities.SENDER_ID;
+
 public class MainActivity extends Activity {
-	/**
-	 * A dummy authentication store containing known user names and passwords.
-	 * TODO: remove after connecting to a real authentication system.
-	 */
+
 	private static final String[] DUMMY_CREDENTIALS = new String[] {
 			"foo@example.com:hello", "bar@example.com:world" };
-
-	/**
-	 * The default email to populate the email field with.
-	 */
 	public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
-
-	/**
-	 * Keep track of the login task to ensure we can cancel it if requested.
-	 */
 	private UserLoginTask mAuthTask = null;
 	private UserCreateTask mCreateTask = null;
 
@@ -82,6 +70,7 @@ public class MainActivity extends Activity {
 	String get_id, get_name, get_gender, get_email, get_birthday, get_locale,
 			get_location;
 	private boolean doubleBackToExitPressedOnce = false;
+	private String regId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +84,30 @@ public class MainActivity extends Activity {
 		// StrictMode.ThreadPolicy policy = new
 		// StrictMode.ThreadPolicy.Builder().permitAll().build();
 		// StrictMode.setThreadPolicy(policy);
+
+		GCMRegistrar.checkDevice(this);
+		GCMRegistrar.checkManifest(this);
+		
+
+		
+
+		// Get GCM registration id
+		regId = GCMRegistrar.getRegistrationId(this);
+
+		if (regId.equals("")) {
+			// Registration is not present, register now with GCM
+			GCMRegistrar.register(this, SENDER_ID);
+		} else {
+			// Device is already registered on GCM
+			if (GCMRegistrar.isRegisteredOnServer(this)) {
+				// Skips registration.
+				Toast.makeText(getApplicationContext(),
+						"Already registered with GCM", Toast.LENGTH_LONG)
+						.show();
+			} else {
+				
+			}
+		}
 
 		// Set up the login form.
 		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
@@ -148,7 +161,8 @@ public class MainActivity extends Activity {
 
 			}
 		});
-		authButton.setReadPermissions(Arrays.asList("public_profile", "email", "user_friends"));
+		authButton.setReadPermissions(Arrays.asList("public_profile", "email",
+				"user_friends"));
 
 		authButton.setSessionStatusCallback(new Session.StatusCallback() {
 
@@ -172,23 +186,21 @@ public class MainActivity extends Activity {
 										get_birthday = user.getBirthday();
 										get_locale = (String) user
 												.getProperty("locale");
-										
-										Session session = Session.getActiveSession();
+
+										Session session = Session
+												.getActiveSession();
 
 										sessionM.createLoginSession(get_id,
 												session.getAccessToken());
-										
+
 										getFriends();
-										
-										
+
 										mCreateTask = new UserCreateTask();
 										mCreateTask.execute((Void) null);
 									}
 								}
 							}).executeAsync();
-					
 
-					
 				} else if (session.isClosed()) {
 					// txtSaludo.setText("!Bienvenido!");
 				}
@@ -197,27 +209,28 @@ public class MainActivity extends Activity {
 		// FACEBOOK LOGIN //
 
 	}
-	
-	private void getFriends(){
-	    Session activeSession = Session.getActiveSession();
-	    if(activeSession.getState().isOpened()){
-	        Request friendRequest = Request.newMyFriendsRequest(activeSession, 
-	            new GraphUserListCallback(){
-	                @Override
-	                public void onCompleted(List<GraphUser> users,
-	                        Response response) {
-	                    Log.i("INFO", response.toString());
-	                    for (int i = 0; i < users.size(); i++) {
-	                        Log.e("users", "users " + users.get(i).getName());
-	                    }
 
-	                }
-	        });
-	        Bundle params = new Bundle();
-	        params.putString("fields", "id,name,picture");
-	        friendRequest.setParameters(params);
-	        friendRequest.executeAsync();
-	    }
+	private void getFriends() {
+		Session activeSession = Session.getActiveSession();
+		if (activeSession.getState().isOpened()) {
+			Request friendRequest = Request.newMyFriendsRequest(activeSession,
+					new GraphUserListCallback() {
+						@Override
+						public void onCompleted(List<GraphUser> users,
+								Response response) {
+							Log.i("INFO", response.toString());
+							for (int i = 0; i < users.size(); i++) {
+								Log.e("users", "users "
+										+ users.get(i).getName());
+							}
+
+						}
+					});
+			Bundle params = new Bundle();
+			params.putString("fields", "id,name,picture");
+			friendRequest.setParameters(params);
+			friendRequest.executeAsync();
+		}
 	}
 
 	@Override
@@ -379,8 +392,7 @@ public class MainActivity extends Activity {
 
 			if (success) {
 				// finish();
-				sessionM.createLoginSession("no_id",
-						mEmail);
+				sessionM.createLoginSession("no_id", mEmail);
 				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
 				startActivity(i);
 				finish();
@@ -417,6 +429,8 @@ public class MainActivity extends Activity {
 			parametros.add(get_name);
 			parametros.add("Correo");
 			parametros.add(get_email);
+			parametros.add("regID");
+			parametros.add(regId);
 
 			JSONParseo jParseo = new JSONParseo();
 
@@ -445,7 +459,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onPostExecute(final Boolean success) {
 			mCreateTask = null;
-			//showProgress(false);
+			// showProgress(false);
 
 			if (success) {
 				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
@@ -471,28 +485,31 @@ public class MainActivity extends Activity {
 		Session.getActiveSession().onActivityResult(this, requestCode,
 				resultCode, data);
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-	    if (doubleBackToExitPressedOnce) {
-	    	Intent startMain = new Intent(Intent.ACTION_MAIN); 
-	    	startMain.addCategory(Intent.CATEGORY_HOME); 
-	    	startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); 
-	    	startActivity(startMain); 
-	    	System.exit(0);
-	    	finish();
-	    }
+		if (doubleBackToExitPressedOnce) {
+			Intent startMain = new Intent(Intent.ACTION_MAIN);
+			startMain.addCategory(Intent.CATEGORY_HOME);
+			startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(startMain);
+			System.exit(0);
+			finish();
+		}
 
-	    this.doubleBackToExitPressedOnce = true;
-	    Toast.makeText(this, "Presione atras otra vez para salir", Toast.LENGTH_SHORT).show();
+		this.doubleBackToExitPressedOnce = true;
+		Toast.makeText(this, "Presione atras otra vez para salir",
+				Toast.LENGTH_SHORT).show();
 
-	    new Handler().postDelayed(new Runnable() {
+		new Handler().postDelayed(new Runnable() {
 
-	        @Override
-	        public void run() {
-	            doubleBackToExitPressedOnce=false;                       
-	        }
-	    }, 2000);
-	} 
+			@Override
+			public void run() {
+				doubleBackToExitPressedOnce = false;
+			}
+		}, 2000);
+	}
+
+	
 
 }

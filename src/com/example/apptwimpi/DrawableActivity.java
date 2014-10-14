@@ -1,5 +1,8 @@
 package com.example.apptwimpi;
 
+import static com.example.apptwimpi.CommonUtilities.DISPLAY_MESSAGE_ACTION;
+import static com.example.apptwimpi.CommonUtilities.EXTRA_MESSAGE;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,12 +12,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -25,24 +32,29 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphUser;
+import com.google.android.gcm.GCMRegistrar;
 
-public class DrawableActivity extends Activity {
+public class DrawableActivity extends Activity implements OnRefreshListener {
 
+	private SwipeRefreshLayout swipeLayout;
 	// Session Manager Class
 	SessionManager session;
 	private String[] titulos;
@@ -62,14 +74,27 @@ public class DrawableActivity extends Activity {
 	// private ImageView profile_pic;
 	private String cNombre;
 	private TraeUserTask mGetUserTask = null;
+	private TraeEventTask mGetEventTask = null;
 	private ListView miLista;
 	private ImageButton btnGroups;
 	private ImageButton btnFriends;
+	private TextView lblRecibe;
+	private String[] idEventos;
+	private ArrayList<Amigo> arraydir;
+	private ListView lista;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_drawable);
+		
+		swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        swipeLayout.setOnRefreshListener(this);
+        swipeLayout.setColorScheme(android.R.color.holo_blue_bright, 
+                android.R.color.holo_green_light, 
+                android.R.color.holo_orange_light, 
+                android.R.color.holo_red_light);
+
 		// Session class instance
 		session = new SessionManager(getApplicationContext());
 		session.checkLogin();
@@ -178,54 +203,56 @@ public class DrawableActivity extends Activity {
 
 		
 
-		/*
-		 * ListView lista = (ListView) findViewById(R.id.list_amigos);
-		 * ArrayList<Amigo> arraydir = new ArrayList<Amigo>(); Amigo directivo;
-		 * 
-		 * 
-		 * // Introduzco los datos directivo = new Amigo(
-		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
-		 * , "Arianna Huffington", "Presidenta"); arraydir.add(directivo);
-		 * directivo = new Amigo(
-		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
-		 * , "Princesa Corinna", "CEO"); arraydir.add(directivo); directivo =
-		 * new Amigo(
-		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
-		 * , "Hillary Clinton", "Tesorera"); arraydir.add(directivo); directivo
-		 * = new Amigo(
-		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
-		 * , "Bono el de U2", "Amenizador"); arraydir.add(directivo); directivo
-		 * = new Amigo(
-		 * "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74"
-		 * , "Carmen de Mairena", "Directora RRHH"); arraydir.add(directivo);
-		 * 
-		 * 
-		 * // Creo el adapter personalizado AdapterAmigo adapter = new
-		 * AdapterAmigo(this, arraydir);
-		 * 
-		 * // Lo aplico lista.setAdapter(adapter);
-		 */
-		
-		btnGroups = (ImageButton)findViewById(R.id.btn_groups);
+		btnGroups = (ImageButton) findViewById(R.id.btn_groups);
 		btnGroups.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(DrawableActivity.this, GroupActivity.class);
+				Intent i = new Intent(DrawableActivity.this,
+						GroupActivity.class);
 				startActivity(i);
 				overridePendingTransition(R.anim.left_in, R.anim.left_out);
 			}
 		});
-		
-		btnFriends = (ImageButton)findViewById(R.id.btn_friends);
+
+		btnFriends = (ImageButton) findViewById(R.id.btn_friends);
 		btnFriends.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(DrawableActivity.this, FriendsActivity.class);
+				Intent i = new Intent(DrawableActivity.this,
+						FriendsActivity.class);
 				startActivity(i);
 				overridePendingTransition(R.anim.right_in, R.anim.right_out);
 			}
 		});
 
+		lblRecibe = (TextView) findViewById(R.id.lbl_receiver);
+		registerReceiver(mHandleMessageReceiver, new IntentFilter(
+				DISPLAY_MESSAGE_ACTION));
+
+		SharedPreferences sharedPref = getSharedPreferences("mySettings",
+				MODE_PRIVATE);
+
+		String mySetting = sharedPref.getString("mySetting", null);
+		lblRecibe.setText(mySetting);
+
+		findViewById(R.id.button1).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						String fname = ((EditText) findViewById(R.id.edt1))
+								.getText().toString();
+						SharedPreferences sharedPref = getSharedPreferences(
+								"mySettings", MODE_PRIVATE);
+
+						SharedPreferences.Editor editor = sharedPref.edit();
+						editor.putString("mySetting", fname);
+						editor.commit();
+					}
+				});
+
+		mGetEventTask = new TraeEventTask();
+		mGetEventTask.execute((Void) null);
+		
 	}
 
 	private void getUserData(final Session session) {
@@ -450,6 +477,117 @@ public class DrawableActivity extends Activity {
 		protected void onCancelled() {
 			mGetUserTask = null;
 		}
+	}
+
+	public class TraeEventTask extends AsyncTask<Void, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			// TODO: attempt authentication against a network service.
+
+			/*
+			 * try { // Simulate network access. Thread.sleep(2000);
+			 * 
+			 * } catch (InterruptedException e) { return false; }
+			 */
+
+			boolean exito = false;
+			ArrayList<String> parametros = new ArrayList<String>();
+			parametros.add("IDUser");
+			parametros.add(user.get(SessionManager.KEY_NAME));
+
+			JSONParseoArray jParseo = new JSONParseoArray();
+
+			String URL = "https://www.pisodigital.cl/twimpiweb/getEvent.php";
+
+			JSONArray json = jParseo.getJSONFromUrl(URL, "post", parametros);
+
+			try {
+				idEventos = new String[json.length()];
+				lista = (ListView) findViewById(R.id.list_amigos);
+				arraydir = new ArrayList<Amigo>();
+				Amigo directivo;
+				for (int i = 0; i < json.length(); i++) {
+					JSONObject jsonObject = json.getJSONObject(i);
+					
+					directivo = new Amigo(
+							"https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74",
+							jsonObject.getString("evento_nombre"), jsonObject.getString("evento_fecha_evento"));
+					arraydir.add(directivo);
+					idEventos[i] = jsonObject.getString("evento_id");
+				}
+
+			} catch (Exception error) {
+				exito = false;
+				Toast.makeText(getApplicationContext(),
+						"error:" + error.getLocalizedMessage(),
+						Toast.LENGTH_LONG).show();
+			}
+			return exito;
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean success) {
+
+			// Creo el adapter personalizado
+			AdapterAmigo adapter = new AdapterAmigo(DrawableActivity.this, arraydir);
+
+			// Lo aplico
+			lista.setAdapter(adapter);
+			swipeLayout.setRefreshing(false);
+			if (success) {
+				
+			} else {
+
+			}
+		}
+
+		@Override
+		protected void onCancelled() {
+			mGetEventTask = null;
+		}
+	}
+
+	/**
+	 * Receiving push messages
+	 * */
+	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+			// Waking up mobile if it is sleeping
+			WakeLocker.acquire(getApplicationContext());
+
+			/**
+			 * Take appropriate action on this message depending upon your app
+			 * requirement For now i am just displaying it on the screen
+			 * */
+
+			// Showing received message
+			lblRecibe.append(newMessage + "\n");
+			Toast.makeText(getApplicationContext(),
+					"New Message: " + newMessage, Toast.LENGTH_LONG).show();
+
+			// Releasing wake lock
+			WakeLocker.release();
+		}
+	};
+
+	@Override
+	protected void onDestroy() {
+
+		try {
+			unregisterReceiver(mHandleMessageReceiver);
+			GCMRegistrar.onDestroy(this);
+		} catch (Exception e) {
+			Log.e("UnRegister Receiver Error", "> " + e.getMessage());
+		}
+		super.onDestroy();
+	}
+
+	@Override
+	public void onRefresh() {
+		mGetEventTask = new TraeEventTask();
+		mGetEventTask.execute((Void) null);
 	}
 
 }

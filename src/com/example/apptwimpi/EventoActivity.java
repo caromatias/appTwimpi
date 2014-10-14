@@ -404,6 +404,10 @@ public class EventoActivity extends ListActivity {
 		@Override
 		protected void onPostExecute(final Boolean success) {
 
+			
+			Intent i = new Intent(EventoActivity.this, DrawableActivity.class);
+			startActivity(i);
+			showProgress(false);
 			if (success) {
 				// finish();
 				showProgress(false);
