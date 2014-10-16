@@ -123,13 +123,13 @@
         <activity
             android:name=".FriendsActivity"
             android:label="@string/title_activity_friends" >
-            
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".DrawableActivity" />
         </activity>
-        
+
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
@@ -145,6 +145,15 @@
         </receiver>
 
         <service android:name=".GCMIntentService" />
+
+        <activity
+            android:name=".EventDetailActivity"
+            android:label="@string/title_activity_event_detail" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".EventoActivity" />
+        </activity>
     </application>
 
 </manifest>

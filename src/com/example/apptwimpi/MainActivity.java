@@ -186,6 +186,8 @@ public class MainActivity extends Activity {
 										get_birthday = user.getBirthday();
 										get_locale = (String) user
 												.getProperty("locale");
+										
+										Log.d("TRAEONOLAWEA", response.toString());
 
 										Session session = Session
 												.getActiveSession();
@@ -429,6 +431,8 @@ public class MainActivity extends Activity {
 			parametros.add(get_name);
 			parametros.add("Correo");
 			parametros.add(get_email);
+			parametros.add("urlPic");
+			parametros.add("https://graph.facebook.com/"+get_id+"/picture");
 			parametros.add("regID");
 			parametros.add(regId);
 

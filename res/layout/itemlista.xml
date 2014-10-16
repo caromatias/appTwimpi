@@ -4,13 +4,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <ImageView
+    <com.example.apptwimpi.RoundedImageView
         android:id="@+id/foto"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="14dp"
+        android:layout_marginLeft="14dp"
         android:src="@drawable/ic_launcher" />
 
     <TextView

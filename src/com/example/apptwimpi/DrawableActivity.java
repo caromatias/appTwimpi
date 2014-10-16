@@ -44,6 +44,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
@@ -87,13 +88,13 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_drawable);
-		
+
 		swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
-        swipeLayout.setOnRefreshListener(this);
-        swipeLayout.setColorScheme(android.R.color.holo_blue_bright, 
-                android.R.color.holo_green_light, 
-                android.R.color.holo_orange_light, 
-                android.R.color.holo_red_light);
+		swipeLayout.setOnRefreshListener(this);
+		swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+				android.R.color.holo_green_light,
+				android.R.color.holo_orange_light,
+				android.R.color.holo_red_light);
 
 		// Session class instance
 		session = new SessionManager(getApplicationContext());
@@ -201,8 +202,6 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 			}
 		});
 
-		
-
 		btnGroups = (ImageButton) findViewById(R.id.btn_groups);
 		btnGroups.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -252,7 +251,7 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 
 		mGetEventTask = new TraeEventTask();
 		mGetEventTask.execute((Void) null);
-		
+
 	}
 
 	private void getUserData(final Session session) {
@@ -506,14 +505,21 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 				lista = (ListView) findViewById(R.id.list_amigos);
 				arraydir = new ArrayList<Amigo>();
 				Amigo directivo;
-				for (int i = 0; i < json.length(); i++) {
-					JSONObject jsonObject = json.getJSONObject(i);
-					
-					directivo = new Amigo(
-							"https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpf1/v/t1.0-1/p160x160/1236128_10203708010131688_5985732519334749622_n.jpg?oh=fb4a50cb68c191b3bca4b6ce4a29a1be&oe=548EE5AB&__gda__=1418418887_43f71fb0f1016beb8c975e331fe20e74",
-							jsonObject.getString("evento_nombre"), jsonObject.getString("evento_fecha_evento"));
-					arraydir.add(directivo);
-					idEventos[i] = jsonObject.getString("evento_id");
+				if (json.length() >= 1) {
+					for (int i = 0; i < json.length(); i++) {
+						JSONObject jsonObject = json.getJSONObject(i);
+						if(!jsonObject.getString("evento_nombre").equals("nodatos")){
+							directivo = new Amigo(
+									jsonObject.getString("usuario_url"),
+									jsonObject.getString("evento_nombre"),
+									jsonObject.getString("evento_fecha_evento"));
+							arraydir.add(directivo);
+							idEventos[i] = jsonObject.getString("evento_id");
+						}
+					}
+					exito = true;
+				} else {
+					exito = false;
 				}
 
 			} catch (Exception error) {
@@ -528,16 +534,25 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 		@Override
 		protected void onPostExecute(final Boolean success) {
 
-			// Creo el adapter personalizado
-			AdapterAmigo adapter = new AdapterAmigo(DrawableActivity.this, arraydir);
-
-			// Lo aplico
-			lista.setAdapter(adapter);
-			swipeLayout.setRefreshing(false);
 			if (success) {
-				
-			} else {
+				// Creo el adapter personalizado
+				AdapterAmigo adapter = new AdapterAmigo(DrawableActivity.this,
+						arraydir);
 
+				// Lo aplico
+				lista.setAdapter(adapter);
+				lista.setOnItemClickListener(new OnItemClickListener() {
+		            @Override
+		            public void onItemClick(AdapterView<?> parent, View v, int posicion, long id) {
+		                Intent i = new Intent(DrawableActivity.this, EventDetailActivity.class);
+		                i.putExtra("idEvento", idEventos[posicion]);
+		                startActivity(i);
+		                overridePendingTransition( R.anim.slide_in_up, R.anim.slide_out_up );
+		            }
+		        });	
+				swipeLayout.setRefreshing(false);
+			} else {
+				
 			}
 		}
 
