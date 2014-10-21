@@ -6,10 +6,15 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
@@ -19,6 +24,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -42,6 +48,12 @@ public class EventDetailActivity extends Activity {
 	private Button btnNo;
 	private String idEvento;
 	private String accion;
+	private View formAsistencia;
+	private View refreshAsistencia;
+	private View resultadoAsistencia;
+	private ImageView imgFinal;
+	private String esDueno;
+	private ArrayList<AmigoEvento> arraydir;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,14 +69,21 @@ public class EventDetailActivity extends Activity {
 		txt2 = (TextView) findViewById(R.id.txtDescripcionEvento);
 		btnSi = (Button) findViewById(R.id.btn_si);
 		btnNo = (Button) findViewById(R.id.btn_no);
+		formAsistencia = (View) findViewById(R.id.form_asist);
+		refreshAsistencia = (View) findViewById(R.id.refresh_asist);
+		resultadoAsistencia = (View) findViewById(R.id.event_asist);
+		imgFinal = (ImageView) findViewById(R.id.img_paso);
 		mGetEventTask = new mGetEventTask();
 		mGetEventTask.execute((Void) null);
-		
+
 		mUpdateEstadoEvent = new mUpdateEstadoEvent();
-		
+
+		esDueno = user.get(SessionManager.KEY_NAME);
+
 		btnSi.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				showProgress(true);
 				accion = "1";
 				mUpdateEstadoEvent.execute((Void) null);
 			}
@@ -72,11 +91,50 @@ public class EventDetailActivity extends Activity {
 		btnNo.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				showProgress(true);
 				accion = "2";
 				mUpdateEstadoEvent.execute((Void) null);
 			}
 		});
-		
+
+	}
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+	private void showProgress(final boolean show) {
+		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+		// for very easy animations. If available, use these APIs to fade-in
+		// the progress spinner.
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+			int shortAnimTime = getResources().getInteger(
+					android.R.integer.config_shortAnimTime);
+
+			refreshAsistencia.setVisibility(View.VISIBLE);
+			refreshAsistencia.animate().setDuration(shortAnimTime)
+					.alpha(show ? 1 : 0)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							refreshAsistencia.setVisibility(show ? View.VISIBLE
+									: View.GONE);
+						}
+					});
+
+			formAsistencia.setVisibility(View.VISIBLE);
+			formAsistencia.animate().setDuration(shortAnimTime)
+					.alpha(show ? 0 : 1)
+					.setListener(new AnimatorListenerAdapter() {
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							formAsistencia.setVisibility(show ? View.GONE
+									: View.GONE);
+						}
+					});
+		} else {
+			// The ViewPropertyAnimator APIs are not available, so simply show
+			// and hide the relevant UI components.
+			refreshAsistencia.setVisibility(show ? View.VISIBLE : View.GONE);
+			formAsistencia.setVisibility(show ? View.GONE : View.GONE);
+		}
 	}
 
 	public class mGetEventTask extends AsyncTask<Void, Void, Boolean> {
@@ -109,7 +167,42 @@ public class EventDetailActivity extends Activity {
 					idAmigos[i] = jsonObject.getString("evento_creador");
 					nombreAmigos[i] = jsonObject.getString("usuario_nombre");
 					tituloEvento = jsonObject.getString("evento_nombre");
-					descripcionEvento = jsonObject.getString("evento_descripcion");
+					descripcionEvento = jsonObject
+							.getString("evento_descripcion");
+				}
+
+				lv1 = (ListView) findViewById(R.id.listView1);
+				arraydir = new ArrayList<AmigoEvento>();
+				AmigoEvento directivo;
+				if (json.length() >= 1) {
+					for (int i = 0; i < json.length(); i++) {
+						JSONObject jsonObject = json.getJSONObject(i);
+						if (!jsonObject.getString("evento_nombre").equals(
+								"nodatos")) {
+							if(jsonObject.getString("usuario_estado").equals("0")){
+								directivo = new AmigoEvento(getResources()
+										.getDrawable(
+												R.drawable.ic_action_help),
+										jsonObject.getString("usuario_nombre"));
+								arraydir.add(directivo);
+							}else if(jsonObject.getString("usuario_estado").equals("1")){
+								directivo = new AmigoEvento(getResources()
+										.getDrawable(
+												R.drawable.ic_navigation_accept_green),
+										jsonObject.getString("usuario_nombre"));
+								arraydir.add(directivo);
+							}else if(jsonObject.getString("usuario_estado").equals("2")){
+								directivo = new AmigoEvento(getResources()
+										.getDrawable(
+												R.drawable.ic_navigation_cancel_red),
+										jsonObject.getString("usuario_nombre"));
+								arraydir.add(directivo);
+							}
+						}
+					}
+					exito = true;
+				} else {
+					exito = false;
 				}
 
 			} catch (Exception error) {
@@ -124,14 +217,23 @@ public class EventDetailActivity extends Activity {
 
 			txt1.setText(tituloEvento);
 			txt2.setText(descripcionEvento);
-			lv1 = (ListView) findViewById(R.id.listView1);
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-					getApplicationContext(), R.layout.custom_textview,
-					nombreAmigos);
+			/*
+			 * lv1 = (ListView) findViewById(R.id.listView1);
+			 * ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+			 * getApplicationContext(), R.layout.custom_textview, nombreAmigos);
+			 * lv1.setAdapter(adapter);
+			 */
+			AdapterEvento adapter = new AdapterEvento(EventDetailActivity.this,
+					arraydir);
+
+			// Lo aplico
 			lv1.setAdapter(adapter);
 			registerForContextMenu(lv1);
 			btnSi.setEnabled(true);
 			btnNo.setEnabled(true);
+			if (!esDueno.equals(idAmigos[0])) {
+				formAsistencia.setVisibility(View.VISIBLE);
+			}
 		}
 
 		@Override
@@ -139,7 +241,7 @@ public class EventDetailActivity extends Activity {
 
 		}
 	}
-	
+
 	public class mUpdateEstadoEvent extends AsyncTask<Void, Void, Boolean> {
 		@SuppressLint("NewApi")
 		@Override
@@ -165,9 +267,9 @@ public class EventDetailActivity extends Activity {
 			try {
 				for (int i = 0; i < json.length(); i++) {
 					JSONObject jsonObject = json.getJSONObject(i);
-					if(jsonObject.getString("success").equals("insertado")){
+					if (jsonObject.getString("success").equals("insertado")) {
 						exito = true;
-					}else{
+					} else {
 						exito = false;
 					}
 				}
@@ -184,6 +286,15 @@ public class EventDetailActivity extends Activity {
 
 			if (success) {
 				Log.d("BIEN IMBECIL!!!!", "FUNCIONARA LA WEA?");
+				showProgress(false);
+				if (accion.equals("1")) {
+					// imgFinal.setVisibility(View.VISIBLE);
+				} else {
+					imgFinal.setImageResource(R.drawable.ic_action_cancel);
+					imgFinal.setBackgroundColor(Color.RED);
+				}
+				resultadoAsistencia.setVisibility(View.VISIBLE);
+				formAsistencia.setVisibility(View.GONE);
 			} else {
 				Log.d("MAL IMBECIL!!!!", "NO FUNCIONO NA LA WEA");
 			}
@@ -213,10 +324,10 @@ public class EventDetailActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-	    super.onBackPressed();
-	    overridePendingTransition( R.anim.push_down_in, R.anim.push_down_out );
+		super.onBackPressed();
+		overridePendingTransition(R.anim.push_down_in, R.anim.push_down_out);
 	}
 }

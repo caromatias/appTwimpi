@@ -13,56 +13,107 @@
         android:layout_height="75dp"
         android:background="#FFFFFF" >
 
-        <TextView
-            android:id="@+id/txtTituloEvento"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
+        <RelativeLayout
+            android:layout_width="150dp"
+            android:layout_height="75dp">
+
+            <TextView
+                android:id="@+id/txtTituloEvento"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="29dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/form_asist"
+            android:layout_width="150dp"
+            android:layout_height="75dp"
+            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="29dp"
-            android:text=""
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:layout_marginRight="8dp"
+            android:visibility="visible" >
 
-        <Button
-            android:id="@+id/btn_si"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/txtTituloEvento"
-            android:layout_alignBottom="@+id/txtTituloEvento"
+            <Button
+                android:id="@+id/btn_no"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/btn_si"
+                android:layout_alignBottom="@+id/btn_si"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="23dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/btn_selector_asist_no"
+                android:enabled="false"
+                android:text="@string/asist_no"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignRight="@+id/btn_no"
+                android:layout_marginRight="23dp"
+                android:text="Asistiras?"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <Button
+                android:id="@+id/btn_si"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView1"
+                android:layout_marginRight="11dp"
+                android:layout_toLeftOf="@+id/btn_no"
+                android:background="@drawable/btn_asist_selector_si"
+                android:enabled="false"
+                android:text="@string/asist_si"
+                android:textColor="#FFFFFF" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/refresh_asist"
+            android:layout_width="150dp"
+            android:layout_height="75dp"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="91dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/btn_asist_selector_si"
-            android:textColor="#FFFFFF"
-            android:text="@string/asist_si" 
-            android:enabled="false"/>
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            android:visibility="gone" >
 
-        <Button
-            android:id="@+id/btn_no"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/btn_si"
-            android:layout_alignBottom="@+id/btn_si"
+            <ProgressBar
+                android:id="@+id/progressBar_asist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/event_asist"
+            android:layout_width="150dp"
+            android:layout_height="75dp"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="23dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/btn_selector_asist_no"
-            android:textColor="#FFFFFF"
-            android:text="@string/asist_no"
-            android:enabled="false"/>
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            android:visibility="gone" >
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/btn_no"
-            android:layout_marginRight="28dp"
-            android:text="Asistiras?"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
+            <com.example.apptwimpi.RoundedImageView
+                android:id="@+id/img_paso"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="21dp"
+                android:adjustViewBounds="true"
+                android:background="#6CC500"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_action_accept" />
+        </RelativeLayout>
     </RelativeLayout>
 
     <ScrollView
