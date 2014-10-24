@@ -6,6 +6,7 @@ import static com.example.apptwimpi.CommonUtilities.EXTRA_MESSAGE;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +37,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -79,15 +82,30 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 	private ListView miLista;
 	private ImageButton btnGroups;
 	private ImageButton btnFriends;
+	private ImageButton btnEvento;
 	private TextView lblRecibe;
 	private String[] idEventos;
 	private ArrayList<Amigo> arraydir;
 	private ListView lista;
+	private ProgressDialog pDialog;
+	private ImageView profile_pic;
+	private TextView uNombre;
+	private ImageLoader imgLoader;
+	private String imagePerfil;
+	private String uBiografia;
+	private TextView biografia;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_drawable);
+
+		pDialog = new ProgressDialog(DrawableActivity.this);
+		pDialog.setMessage("Cargando...");
+		pDialog.setCancelable(false);
+		pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		pDialog.show();
+
 
 		swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
 		swipeLayout.setOnRefreshListener(this);
@@ -105,7 +123,7 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 		NavDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		// Lista
 		NavList = (ListView) findViewById(R.id.lista);
-		// Declaramos el header el caul sera el layout de header.xml
+		// Declaramos el header el cual sera el layout de header.xml
 		View header = getLayoutInflater().inflate(R.layout.header, null);
 		// Establecemos header
 		NavList.addHeaderView(header);
@@ -180,12 +198,12 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 				switch (position) {
 				case 5:
 					Intent i = new Intent(DrawableActivity.this,
-							EventoActivity.class);
+							AllFriendsActivity.class);
 					startActivity(i);
 					break;
 				case 6:
 					Intent i1 = new Intent(DrawableActivity.this,
-							PruebaDeListView.class);
+							SettingsActivity.class);
 					startActivity(i1);
 					break;
 				case 7:
@@ -217,8 +235,18 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 		btnFriends.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(DrawableActivity.this,
-						FriendsActivity.class);
+				Intent i = new Intent(DrawableActivity.this,FriendsActivity.class);
+				//Intent i = new Intent(DrawableActivity.this,AllFriendsActivity.class);
+				startActivity(i);
+				overridePendingTransition(R.anim.right_in, R.anim.right_out);
+			}
+		});
+		btnEvento = (ImageButton) findViewById(R.id.buttonCentral);
+		btnEvento.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(DrawableActivity.this,EventoActivity.class);
+				//Intent i = new Intent(DrawableActivity.this,AllFriendsActivity.class);
 				startActivity(i);
 				overridePendingTransition(R.anim.right_in, R.anim.right_out);
 			}
@@ -249,9 +277,14 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 					}
 				});
 
+		imgLoader = new ImageLoader(this);
+		profile_pic = (ImageView) findViewById(R.id.image_perfil);
+		uNombre = (TextView) findViewById(R.id.nombre_user);
+		biografia = (TextView) findViewById(R.id.txt_biografia);
 		mGetEventTask = new TraeEventTask();
 		mGetEventTask.execute((Void) null);
-
+		
+		//imgLoader.DisplayImage("http://syncker.com/wp-content/uploads/2013/09/android-androide-verde.jpg", profile_pic);
 	}
 
 	private void getUserData(final Session session) {
@@ -315,9 +348,7 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 	}
 
 	public void obtenerDatosFacebook() throws IOException {
-		final ImageView profile_pic = (ImageView) findViewById(R.id.image_perfil);
-		final TextView uNombre = (TextView) findViewById(R.id.nombre_user);
-		// new DownloadImageTask((ImageView)
+		// newsetImageDrawable DownloadImageTask((ImageView)
 		// findViewById(R.id.image_perfil)).execute("https://graph.facebook.com/"+bundle.getString("fbId")+"/picture?type=large");
 		AsyncTask<Void, Void, Bitmap> t = new AsyncTask<Void, Void, Bitmap>() {
 			protected Bitmap doInBackground(Void... p) {
@@ -426,38 +457,30 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 	public class TraeUserTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			// TODO: attempt authentication against a network service.
-
-			/*
-			 * try { // Simulate network access. Thread.sleep(2000);
-			 * 
-			 * } catch (InterruptedException e) { return false; }
-			 */
-
 			boolean exito = false;
-			final TextView uNombre = (TextView) findViewById(R.id.nombre_user);
 			ArrayList<String> parametros = new ArrayList<String>();
-			parametros.add("Correo");
-			parametros.add(uCorreo);
+			parametros.add("uid");
+			parametros.add(user.get(SessionManager.KEY_NAME));
 
 			JSONParseo jParseo = new JSONParseo();
 
-			String URL = "http://www.pisodigital.cl/twimpiweb/getUser.php";
+			String URL = "https://www.pisodigital.cl/twimpiweb/getUser.php";
 
 			JSONObject json = jParseo.recibir(URL, "post", parametros);
 
 			try {
-				String cNombre = json.getString("usuario_nombre");
-				Log.e("LOG", json.getString("usuario_nombre"));
+				imagePerfil = json.getString("usuario_url_large");
+				cNombre = json.getString("usuario_nombre");
+				uBiografia = json.getString("usuario_biografia");
+				Log.e("LOG", json.getString("usuario_url_large"));
 				if (cNombre != "") {
 					exito = true;
-					uNombre.setText(json.getString("usuario_nombre"));
 				} else {
 
 				}
 
 			} catch (Exception error) {
-				uNombre.setText("No hubo conexion");
+				//uNombre.setText("No hubo conexion");
 			}
 			return exito;
 		}
@@ -466,10 +489,13 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 		protected void onPostExecute(final Boolean success) {
 
 			if (success) {
-
+				
 			} else {
 
 			}
+			uNombre.setText(cNombre);
+			imgLoader.DisplayImage(imagePerfil, profile_pic);
+			biografia.setText(uBiografia);
 		}
 
 		@Override
@@ -508,7 +534,8 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 				if (json.length() >= 1) {
 					for (int i = 0; i < json.length(); i++) {
 						JSONObject jsonObject = json.getJSONObject(i);
-						if(!jsonObject.getString("evento_nombre").equals("nodatos")){
+						if (!jsonObject.getString("evento_nombre").equals(
+								"nodatos")) {
 							directivo = new Amigo(
 									jsonObject.getString("usuario_url"),
 									jsonObject.getString("evento_nombre"),
@@ -538,21 +565,27 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 				// Creo el adapter personalizado
 				AdapterAmigo adapter = new AdapterAmigo(DrawableActivity.this,
 						arraydir);
-
+				adapter.notifyDataSetChanged();
 				// Lo aplico
 				lista.setAdapter(adapter);
 				lista.setOnItemClickListener(new OnItemClickListener() {
-		            @Override
-		            public void onItemClick(AdapterView<?> parent, View v, int posicion, long id) {
-		                Intent i = new Intent(DrawableActivity.this, EventDetailActivity.class);
-		                i.putExtra("idEvento", idEventos[posicion]);
-		                startActivity(i);
-		                overridePendingTransition( R.anim.slide_in_up, R.anim.slide_out_up );
-		            }
-		        });	
+					@Override
+					public void onItemClick(AdapterView<?> parent, View v,
+							int posicion, long id) {
+						Intent i = new Intent(DrawableActivity.this,
+								EventDetailActivity.class);
+						i.putExtra("idEvento", idEventos[posicion]);
+						startActivity(i);
+						overridePendingTransition(R.anim.slide_in_up,
+								R.anim.slide_out_up);
+					}
+				});
 				swipeLayout.setRefreshing(false);
+				pDialog.dismiss();
+				mGetUserTask = new TraeUserTask();
+				mGetUserTask.execute((Void) null);
 			} else {
-				
+
 			}
 		}
 
@@ -569,7 +602,7 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
-			// Waking up mobile if it is sleeping
+			// Waking up mobile if it is 09sleeping
 			WakeLocker.acquire(getApplicationContext());
 
 			/**
@@ -604,5 +637,4 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 		mGetEventTask = new TraeEventTask();
 		mGetEventTask.execute((Void) null);
 	}
-
 }

@@ -79,5 +79,12 @@
     <string name="title_activity_event_detail">Detalles del evento</string>
     <string name="asist_si">Sí</string>
     <string name="asist_no">No</string>
+    <string name="title_activity_all_friends">AllFriendsActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_notificaciones">NotificacionesActivity</string>
+    <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="title_activity_help">HelpActivity</string>
+    <string name="title_activity_acerca_de">AcercaDeActivity</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 
 </resources>

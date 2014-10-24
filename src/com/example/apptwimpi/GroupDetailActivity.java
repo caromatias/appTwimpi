@@ -10,6 +10,7 @@ import com.example.apptwimpi.GroupActivity.GetGroupTask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -39,12 +40,19 @@ public class GroupDetailActivity extends Activity {
 	private String[] idAmigos;
 	private TextView txt1;
 	private String tituloGrupo;
+	private ProgressDialog pDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group_detail);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		pDialog = new ProgressDialog(GroupDetailActivity.this);
+        pDialog.setMessage("Cargando Detalles...");
+        pDialog.setCancelable(false);
+        pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pDialog.show();
 		
 		session = new SessionManager(getApplicationContext());
 		session.checkLogin();
@@ -104,7 +112,7 @@ public class GroupDetailActivity extends Activity {
 					nombreAmigos);
 			lv1.setAdapter(adapter);
 			registerForContextMenu(lv1);
-
+			pDialog.dismiss();
 		}
 
 		@Override

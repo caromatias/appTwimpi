@@ -1,13 +1,14 @@
 package com.example.apptwimpi;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
+import java.util.HashMap; 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,12 +17,14 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 public class GroupActivity extends Activity implements OnRefreshListener {
@@ -36,12 +39,20 @@ public class GroupActivity extends Activity implements OnRefreshListener {
 	String[] idAmigos;
 	String[] amigosSeleccionados;
 	private ListView lv1;
-
+    ArrayAdapter <String> adapter;
+    private ProgressDialog pDialog;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		pDialog = new ProgressDialog(GroupActivity.this);
+        pDialog.setMessage("Cargando Grupos...");
+        pDialog.setCancelable(false);
+        pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pDialog.show();
 		
 		swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         swipeLayout.setOnRefreshListener(this);
@@ -75,8 +86,40 @@ public class GroupActivity extends Activity implements OnRefreshListener {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
+		MenuInflater inflater = getMenuInflater();
+		
+
 		getMenuInflater().inflate(R.menu.group, menu);
-		return true;
+		
+		 SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+		 SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+		 
+		 searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+         searchView.setIconifiedByDefault(true);  
+         
+         
+         SearchView.OnQueryTextListener textChangeListener = new SearchView.OnQueryTextListener() 
+	        {
+	            @Override
+	            public boolean onQueryTextChange(String newText) 
+	            {
+	                // this is your adapter that will be filtered
+	                adapter.getFilter().filter(newText);
+	                System.out.println("on text chnge text: "+newText);
+	                return true;
+	            }
+	            @Override
+	            public boolean onQueryTextSubmit(String query) 
+	            {
+	                // this is your adapter that will be filtered
+	                adapter.getFilter().filter(query);
+	                System.out.println("on query submit: "+query);
+	                return true;
+	            }
+	        };
+	        searchView.setOnQueryTextListener(textChangeListener);
+
+	        return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -135,7 +178,7 @@ public class GroupActivity extends Activity implements OnRefreshListener {
 		@Override
 		protected void onPostExecute(final Boolean success) {
 
-			ArrayAdapter <String> adapter = new ArrayAdapter<String>(getApplicationContext(),R.layout.custom_textview, nombreAmigos);
+			adapter = new ArrayAdapter<String>(getApplicationContext(),R.layout.custom_textview, nombreAmigos);
 			lv1.setAdapter(adapter);
 			lv1.setOnItemClickListener(new OnItemClickListener() {
 	            @Override
@@ -144,8 +187,12 @@ public class GroupActivity extends Activity implements OnRefreshListener {
 	                i.putExtra("idGrupo", idAmigos[posicion]);
 	                startActivity(i);
 	            }
+	            
 	        });	
 			swipeLayout.setRefreshing(false);
+			
+			lv1.setTextFilterEnabled(true);
+			pDialog.dismiss();
 		}
 
 		@Override

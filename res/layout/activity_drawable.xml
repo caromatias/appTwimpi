@@ -64,6 +64,7 @@
 
             <requestFocus />
         </EditText>
+        
 
         <Button
             android:id="@+id/button1"
@@ -105,9 +106,9 @@
         android:layout_width="250dp"
         android:layout_height="fill_parent"
         android:layout_gravity="start"
-        android:background="#424242"
+        android:background="#f56f00"
         android:choiceMode="singleChoice"
-        android:divider="#2E2E2E"
+        android:divider="#f56f00"
         android:dividerHeight="2dp"
         android:textColor="#424242" />
 

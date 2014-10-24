@@ -1,5 +1,13 @@
 package com.example.apptwimpi;
 
+import static com.example.apptwimpi.CommonUtilities.SENDER_ID;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,10 +18,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,7 +37,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.apptwimpi.ServerUtilities;
 import com.facebook.FacebookException;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserListCallback;
@@ -39,11 +47,6 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.facebook.widget.LoginButton.OnErrorListener;
 import com.google.android.gcm.GCMRegistrar;
-
-import static com.example.apptwimpi.CommonUtilities.SENDER_ID;
-import static com.example.apptwimpi.CommonUtilities.DISPLAY_MESSAGE_ACTION;
-import static com.example.apptwimpi.CommonUtilities.EXTRA_MESSAGE;
-import static com.example.apptwimpi.CommonUtilities.SENDER_ID;
 
 public class MainActivity extends Activity {
 
@@ -71,6 +74,7 @@ public class MainActivity extends Activity {
 			get_location;
 	private boolean doubleBackToExitPressedOnce = false;
 	private String regId;
+	private Bitmap imagen;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -433,6 +437,8 @@ public class MainActivity extends Activity {
 			parametros.add(get_email);
 			parametros.add("urlPic");
 			parametros.add("https://graph.facebook.com/"+get_id+"/picture");
+			parametros.add("urlPicLarge");
+			parametros.add("https://graph.facebook.com/"+get_id+"/picture?type=large");
 			parametros.add("regID");
 			parametros.add(regId);
 
@@ -457,6 +463,7 @@ public class MainActivity extends Activity {
 						"error:" + error.getLocalizedMessage(),
 						Toast.LENGTH_LONG).show();
 			}
+			//imagen = descargarImagen("https://fbcdn-profile-a.akamaihd.net/hprofile-ak-xpa1/v/t1.0-1/c0.2.50.50/p50x50/934826_10204811629721488_578050191428798944_n.jpg?oh=3245832bf7750a5a10fa364d46f25d4a&oe=54F1CEAD&__gda__=1421742186_821de89f05d1e23290080a32caa42a9f");
 			return exito;
 		}
 
@@ -465,6 +472,8 @@ public class MainActivity extends Activity {
 			mCreateTask = null;
 			// showProgress(false);
 
+			//String ruta = guardarImagen(getApplicationContext(), "imagen", imagen);
+			//Log.e("RUTAAAAA", ruta);
 			if (success) {
 				Intent i = new Intent(MainActivity.this, DrawableActivity.class);
 				startActivity(i);
@@ -513,7 +522,37 @@ public class MainActivity extends Activity {
 			}
 		}, 2000);
 	}
-
 	
-
+	private Bitmap descargarImagen (String imageHttpAddress){
+        URL imageUrl = null;
+        Bitmap imagen = null;
+        try{
+            imageUrl = new URL(imageHttpAddress);
+            HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
+            conn.connect();
+            imagen = BitmapFactory.decodeStream(conn.getInputStream());
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+         
+        return imagen;
+    }
+	
+	private String guardarImagen (Context context, String nombre, Bitmap imagen){
+	    ContextWrapper cw = new ContextWrapper(context);
+	    File dirImages = cw.getDir("Imagenes", Context.MODE_PRIVATE);
+	    File myPath = new File(dirImages, nombre + ".png");
+	     
+	    FileOutputStream fos = null;
+	    try{
+	        fos = new FileOutputStream(myPath);
+	        imagen.compress(Bitmap.CompressFormat.JPEG, 10, fos);
+	        fos.flush();
+	    }catch (FileNotFoundException ex){
+	        ex.printStackTrace();
+	    }catch (IOException ex){
+	        ex.printStackTrace();
+	    }
+	    return myPath.getAbsolutePath();
+	}
 }

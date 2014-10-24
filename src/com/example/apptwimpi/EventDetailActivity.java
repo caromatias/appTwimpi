@@ -11,6 +11,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -54,17 +55,26 @@ public class EventDetailActivity extends Activity {
 	private ImageView imgFinal;
 	private String esDueno;
 	private ArrayList<AmigoEvento> arraydir;
+	private boolean estadoAcept = false;
+	private ProgressDialog pDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_event_detail);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		pDialog = new ProgressDialog(EventDetailActivity.this);
+        pDialog.setMessage("Cargando...");
+        pDialog.setCancelable(false);
+        pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pDialog.show();
 
 		session = new SessionManager(getApplicationContext());
 		session.checkLogin();
 		user = session.getUserDetails();
 
+		lv1 = (ListView) findViewById(R.id.listView1);
 		txt1 = (TextView) findViewById(R.id.txtTituloEvento);
 		txt2 = (TextView) findViewById(R.id.txtDescripcionEvento);
 		btnSi = (Button) findViewById(R.id.btn_si);
@@ -167,11 +177,12 @@ public class EventDetailActivity extends Activity {
 					idAmigos[i] = jsonObject.getString("evento_creador");
 					nombreAmigos[i] = jsonObject.getString("usuario_nombre");
 					tituloEvento = jsonObject.getString("evento_nombre");
-					descripcionEvento = jsonObject
-							.getString("evento_descripcion");
+					descripcionEvento = jsonObject.getString("evento_descripcion");
+					
+					if(esDueno.equals(jsonObject.getString("evento_creador")) && !jsonObject.getString("usuario_estado").equals("0")){
+						estadoAcept = true;
+					}
 				}
-
-				lv1 = (ListView) findViewById(R.id.listView1);
 				arraydir = new ArrayList<AmigoEvento>();
 				AmigoEvento directivo;
 				if (json.length() >= 1) {
@@ -179,22 +190,27 @@ public class EventDetailActivity extends Activity {
 						JSONObject jsonObject = json.getJSONObject(i);
 						if (!jsonObject.getString("evento_nombre").equals(
 								"nodatos")) {
-							if(jsonObject.getString("usuario_estado").equals("0")){
-								directivo = new AmigoEvento(getResources()
-										.getDrawable(
+							if (jsonObject.getString("usuario_estado").equals(
+									"0")) {
+								directivo = new AmigoEvento(
+										getResources().getDrawable(
 												R.drawable.ic_action_help),
 										jsonObject.getString("usuario_nombre"));
 								arraydir.add(directivo);
-							}else if(jsonObject.getString("usuario_estado").equals("1")){
-								directivo = new AmigoEvento(getResources()
-										.getDrawable(
-												R.drawable.ic_navigation_accept_green),
+							} else if (jsonObject.getString("usuario_estado")
+									.equals("1")) {
+								directivo = new AmigoEvento(
+										getResources()
+												.getDrawable(
+														R.drawable.ic_navigation_accept_green),
 										jsonObject.getString("usuario_nombre"));
 								arraydir.add(directivo);
-							}else if(jsonObject.getString("usuario_estado").equals("2")){
-								directivo = new AmigoEvento(getResources()
-										.getDrawable(
-												R.drawable.ic_navigation_cancel_red),
+							} else if (jsonObject.getString("usuario_estado")
+									.equals("2")) {
+								directivo = new AmigoEvento(
+										getResources()
+												.getDrawable(
+														R.drawable.ic_navigation_cancel_red),
 										jsonObject.getString("usuario_nombre"));
 								arraydir.add(directivo);
 							}
@@ -232,8 +248,12 @@ public class EventDetailActivity extends Activity {
 			btnSi.setEnabled(true);
 			btnNo.setEnabled(true);
 			if (!esDueno.equals(idAmigos[0])) {
+				//formAsistencia.setVisibility(View.VISIBLE);
+			}
+			if(!estadoAcept){
 				formAsistencia.setVisibility(View.VISIBLE);
 			}
+			pDialog.dismiss();
 		}
 
 		@Override

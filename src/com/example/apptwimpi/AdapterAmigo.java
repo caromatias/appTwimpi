@@ -25,10 +25,12 @@ import android.widget.TextView;
 public class AdapterAmigo extends BaseAdapter {
 	protected Activity activity;
 	protected ArrayList<Amigo> items;
+	private ImageLoader imgLoader;
 
 	public AdapterAmigo(Activity activity, ArrayList<Amigo> items) {
 		this.activity = activity;
 		this.items = items;
+		imgLoader=new ImageLoader(activity.getApplicationContext());
 	}
 
 	@Override
@@ -61,7 +63,12 @@ public class AdapterAmigo extends BaseAdapter {
 
 		// Creamos un objeto directivo
 		final Amigo dir = items.get(position);
+		////////
+		//imgLoader = new ImageLoader(this);
+		final ImageView foto = (ImageView) v.findViewById(R.id.foto);
+		imgLoader.DisplayImage(dir.getFoto(), foto);
 		//Rellenamos la fotografía
+		/*
 				final ImageView foto = (ImageView) v.findViewById(R.id.foto);
 				AsyncTask<Void, Void, Bitmap> t = new AsyncTask<Void, Void, Bitmap>() {
 					protected Bitmap doInBackground(Void... p) {
@@ -88,6 +95,7 @@ public class AdapterAmigo extends BaseAdapter {
 					}
 				};
 				t.execute();
+		*/
 		TextView nombre = (TextView) v.findViewById(R.id.nombre);
 		nombre.setText(dir.getNombre());
 		// Rellenamos el cargo
