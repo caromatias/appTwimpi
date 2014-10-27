@@ -80,11 +80,11 @@
     <string name="asist_si">Sí</string>
     <string name="asist_no">No</string>
     <string name="title_activity_all_friends">AllFriendsActivity</string>
-    <string name="title_activity_profile">ProfileActivity</string>
-    <string name="title_activity_notificaciones">NotificacionesActivity</string>
-    <string name="title_activity_edit_profile">EditProfileActivity</string>
-    <string name="title_activity_help">HelpActivity</string>
-    <string name="title_activity_acerca_de">AcercaDeActivity</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="title_activity_profile">Perfil</string>
+    <string name="title_activity_notificaciones">Notificaciones</string>
+    <string name="title_activity_edit_profile">Editar perfil</string>
+    <string name="title_activity_help">Ayuda</string>
+    <string name="title_activity_acerca_de">Acerca de</string>
+    <string name="title_activity_settings">Configuración</string>
 
 </resources>

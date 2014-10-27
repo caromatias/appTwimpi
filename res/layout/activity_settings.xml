@@ -15,7 +15,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="33dp"
-        android:background="@drawable/custom_layout"
+        android:background="@drawable/custom_button"
         android:text="Notificaciones" />
 
     <Button
@@ -25,7 +25,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="83dp"
-        android:background="@drawable/custom_layout"
+        android:background="@drawable/custom_button"
         android:text="Editar Perfil" />
     
     <Button
@@ -35,7 +35,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="183dp"
-        android:background="@drawable/custom_layout"
+        android:background="@drawable/custom_button"
         android:text="Ayuda" />
 
     <Button
@@ -45,7 +45,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="233dp"
-        android:background="@drawable/custom_layout"
+        android:background="@drawable/custom_button"
         android:text="Acerca de" />
 
 </RelativeLayout>

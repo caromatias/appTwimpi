@@ -83,6 +83,7 @@ public class GroupDetailActivity extends Activity {
 			String URL = "https://www.pisodigital.cl/twimpiweb/getGroupDetails.php";
 
 			JSONArray json = jParseo.getJSONFromUrl(URL, "post", parametros);
+			
 
 			try {
 				nombreAmigos = new String[json.length()];
