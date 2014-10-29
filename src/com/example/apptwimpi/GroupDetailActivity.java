@@ -23,6 +23,8 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +43,7 @@ public class GroupDetailActivity extends Activity {
 	private TextView txt1;
 	private String tituloGrupo;
 	private ProgressDialog pDialog;
+	private ImageButton CreateEvent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +75,7 @@ public class GroupDetailActivity extends Activity {
 			Bundle bundle = getIntent().getExtras();
 			bundle.getString("id");
 			boolean exito = false;
-			ArrayList parametros = new ArrayList();
+			ArrayList<String> parametros = new ArrayList<String>();
 			parametros.add("idGrupo");
 			parametros.add(bundle.getString("idGrupo"));
 
@@ -114,6 +117,19 @@ public class GroupDetailActivity extends Activity {
 			lv1.setAdapter(adapter);
 			registerForContextMenu(lv1);
 			pDialog.dismiss();
+			
+			CreateEvent = (ImageButton) findViewById(R.id.imageButton1);
+			CreateEvent.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent i = new Intent(GroupDetailActivity.this,CreateEventActivity.class);
+					Bundle b=new Bundle();
+					b.putStringArray("IdAmigosT", idAmigos);
+					i.putExtras(b);
+					startActivity(i);
+					overridePendingTransition(R.anim.right_in, R.anim.right_out);
+				}
+			});
 		}
 
 		@Override

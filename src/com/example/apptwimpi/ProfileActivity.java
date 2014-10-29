@@ -2,8 +2,12 @@ package com.example.apptwimpi;
 
 import java.util.HashMap;
 
+import com.example.apptwimpi.EventoActivity.CreateEventTask;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -29,10 +33,12 @@ public class ProfileActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_profile);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		session = new SessionManager(getApplicationContext());
 		session.checkLogin();
 		user = session.getUserDetails();
+		
 		
 		txt1 = (TextView) findViewById(R.id.nombre_user);
 		txt2 = (TextView) findViewById(R.id.txt_biografia);
@@ -54,11 +60,10 @@ public class ProfileActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		switch (item.getItemId()) {
+		// Respond to the action bar's Up/Home button
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

@@ -86,5 +86,6 @@
     <string name="title_activity_help">Ayuda</string>
     <string name="title_activity_acerca_de">Acerca de</string>
     <string name="title_activity_settings">Configuración</string>
+    <string name="title_activity_create_event">CreateEventActivity</string>
 
 </resources>

@@ -31,7 +31,7 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="19dp"
             android:background="#FFFFFF"
-            android:src="@drawable/ic_action_edit" />
+            android:src="@drawable/ic_navigation_accept_green" />
     </RelativeLayout>
 
     <ScrollView

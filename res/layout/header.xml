@@ -1,9 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="510dp"
-    android:background="#f56f00"
-    android:orientation="vertical" >
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.apptwimpi.ProfileActivity" 
+    android:background="#f56f00">
 
     <TextView
         android:id="@+id/nombre_user"
@@ -27,13 +31,17 @@
         android:src="@drawable/back" />
 
     <RelativeLayout
-        android:layout_width="205dp"
+        android:layout_width="match_parent"
         android:layout_height="150dp"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/nombre_user"
         android:layout_marginLeft="5dp"
         android:layout_marginTop="25dp"
-        android:background="@drawable/custom_layout" >
+        android:background="@drawable/custom_layout"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp" >
 
         <TextView
             android:id="@+id/txt_biografia"
@@ -41,11 +49,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_marginLeft="13dp"
-            android:layout_marginTop="13dp"
+            android:layout_marginTop="3dp"
             android:text="Small Text"
             android:textAppearance="?android:attr/textAppearanceSmall" />
-
     </RelativeLayout>
+    
+    
 
 </RelativeLayout>

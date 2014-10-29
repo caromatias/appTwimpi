@@ -10,6 +10,7 @@ import com.example.apptwimpi.GroupActivity.GetGroupTask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -44,12 +45,19 @@ public class FriendsActivity extends Activity implements OnRefreshListener{
 	String[] picPerfil;
 	private ListView lv1;
     ArrayAdapter <String> adapter;
+    private ProgressDialog pDialog;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_friends);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		pDialog = new ProgressDialog(FriendsActivity.this);
+		pDialog.setMessage("Cargando...");
+		pDialog.setCancelable(false);
+		pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		pDialog.show();
 		
 		swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         swipeLayout.setOnRefreshListener(this);
@@ -190,6 +198,7 @@ public class FriendsActivity extends Activity implements OnRefreshListener{
 			
 			lv1.setTextFilterEnabled(true);
 			
+			pDialog.dismiss();
 		}
 	
 	}

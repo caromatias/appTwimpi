@@ -19,11 +19,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -32,6 +35,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.apptwimpi.MainActivity.UserLoginTask;
 import com.example.apptwimpi.RegisterActivity.UserRegisterTask;
 import com.facebook.HttpMethod;
 import com.facebook.Request;
@@ -41,9 +45,11 @@ import com.facebook.model.GraphObject;
 
 public class EventoActivity extends ListActivity {
 
+	private CreateEventTask mAuthTask = null;
 	private CreateEventTask mCreateTask = null;
 	private Handler handler;
-	
+
+	private TextView mLoginStatusMessageView;
 	// Session Manager Class
 	SessionManager session;
 	HashMap<String, String> user;
@@ -70,7 +76,9 @@ public class EventoActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_evento);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-		
+
+		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
+
 		mCreateEventFormView = findViewById(R.id.scrollView1);
 		mCreateEventStatusView = findViewById(R.id.refresh_status);
 
@@ -96,6 +104,9 @@ public class EventoActivity extends ListActivity {
 		ListView lview = getListView();
 		lview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		lview.setTextFilterEnabled(true);
+		EditNombre = (EditText) findViewById(R.id.edtNombre);
+		EditDescripcion = (EditText) findViewById(R.id.edtDescripcion);
+		EditCupos = (EditText) findViewById(R.id.edtCupos);
 
 		String fqlQuery = "select uid, name, pic_square, is_app_user from user where uid in (select uid2 from friend where uid1 = me())";
 		Bundle params = new Bundle();
@@ -184,12 +195,12 @@ public class EventoActivity extends ListActivity {
 			if (checked.get(i)) {
 				String item = idAmigos[i];
 				s = s + " " + item;
-				asistentes = asistentes + "" + item+";";
+				asistentes = asistentes + "" + item + ";";
 				/* do whatever you want with the checked item */
 			}
 		}
-		Toast.makeText(this, "Amigos selecionados- " + asistentes, Toast.LENGTH_SHORT)
-				.show();
+		Toast.makeText(this, "Amigos selecionados- " + asistentes,
+				Toast.LENGTH_SHORT).show();
 	}
 
 	private void updateDisplay() {
@@ -243,71 +254,113 @@ public class EventoActivity extends ListActivity {
 			return true;
 		case R.id.create_event:
 			/*
-			Runnable runnable = new Runnable() {
-	            @Override
-	            public void run() {
-	                handler.post(new Runnable() { // This thread runs in the UI
-	                    @Override
-	                    public void run() {
-	                    	boolean exito = false;
-	            			EditNombre = (EditText)findViewById(R.id.edtNombre);
-	            			Nombre = EditNombre.getText().toString();
-	            			EditDescripcion = (EditText)findViewById(R.id.edtDescripcion);
-	            			Descripcion = EditDescripcion.getText().toString();
-	            			EditCupos = (EditText)findViewById(R.id.edtCupos);
-	            			Cupos = EditCupos.getText().toString();
-	            			ArrayList parametros = new ArrayList();
-	            			parametros.add("NombreEvento");
-	            			parametros.add(Nombre);
-	            			parametros.add("DescripcionEvento");
-	            			parametros.add(Descripcion);
-	            			parametros.add("CuposEvento");
-	            			parametros.add(Cupos);
-	            			parametros.add("FechaEvento");
-	            			parametros.add(date);
-	            			parametros.add("EventoCreador");
-	            			parametros.add(user.get(SessionManager.KEY_NAME));
-	            			parametros.add("Asistentes");
-	            			parametros.add(asistentes);
-	            			
-	            			Log.d("LOG", parametros.toString());
-
-	            			JSONParseo jParseo = new JSONParseo();
-
-	            			String URL = "http://www.pisodigital.cl/twimpiweb/createEvent.php";
-
-	            			JSONObject json = jParseo.recibir(URL, "post", parametros);
-
-	            			try {
-	            				String success = json.getString("success");
-	            				Log.e("LOG", json.getString("success"));
-	            				if (success.equals("0")) {
-	            					exito = true;
-	            				}
-
-	            			} catch (Exception error) {
-	            				exito = false;
-	            				Toast.makeText(getApplicationContext(),
-	            						"error:" + error.getLocalizedMessage(),
-	            						Toast.LENGTH_LONG).show();
-	            			}
-	                    }
-	                });
-	            }
-	        };
-	        new Thread(runnable).start();
-			*/
+			 * Runnable runnable = new Runnable() {
+			 * 
+			 * @Override public void run() { handler.post(new Runnable() { //
+			 * This thread runs in the UI
+			 * 
+			 * @Override public void run() { boolean exito = false; EditNombre =
+			 * (EditText)findViewById(R.id.edtNombre); Nombre =
+			 * EditNombre.getText().toString(); EditDescripcion =
+			 * (EditText)findViewById(R.id.edtDescripcion); Descripcion =
+			 * EditDescripcion.getText().toString(); EditCupos =
+			 * (EditText)findViewById(R.id.edtCupos); Cupos =
+			 * EditCupos.getText().toString(); ArrayList parametros = new
+			 * ArrayList(); parametros.add("NombreEvento");
+			 * parametros.add(Nombre); parametros.add("DescripcionEvento");
+			 * parametros.add(Descripcion); parametros.add("CuposEvento");
+			 * parametros.add(Cupos); parametros.add("FechaEvento");
+			 * parametros.add(date); parametros.add("EventoCreador");
+			 * parametros.add(user.get(SessionManager.KEY_NAME));
+			 * parametros.add("Asistentes"); parametros.add(asistentes);
+			 * 
+			 * Log.d("LOG", parametros.toString());
+			 * 
+			 * JSONParseo jParseo = new JSONParseo();
+			 * 
+			 * String URL =
+			 * "http://www.pisodigital.cl/twimpiweb/createEvent.php";
+			 * 
+			 * JSONObject json = jParseo.recibir(URL, "post", parametros);
+			 * 
+			 * try { String success = json.getString("success"); Log.e("LOG",
+			 * json.getString("success")); if (success.equals("0")) { exito =
+			 * true; }
+			 * 
+			 * } catch (Exception error) { exito = false;
+			 * Toast.makeText(getApplicationContext(), "error:" +
+			 * error.getLocalizedMessage(), Toast.LENGTH_LONG).show(); } } }); }
+			 * }; new Thread(runnable).start();
+			 */
+			validaCampos();
+			/*
 			showProgress(true);
 			mCreateTask = new CreateEventTask();
 			mCreateTask.execute((Void) null);
+			*/
 			break;
+
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	/**
 	 * Shows the progress UI and hides the login form.
 	 */
+
+	public void validaCampos() {
+
+		EditNombre.setError(null);
+		EditDescripcion.setError(null);
+		EditCupos.setError(null);
+		Nombre = EditNombre.getText().toString();
+		Descripcion = EditDescripcion.getText().toString();
+		Cupos = EditCupos.getText().toString();
+
+		boolean cancel = false;
+		View focusView = null;
+
+		if (TextUtils.isEmpty(Nombre)) {
+			EditNombre.setError(getString(R.string.error_field_required));
+			focusView = EditNombre;
+			cancel = true;
+		} else {
+
+			cancel = false;
+		}
+		
+		if (TextUtils.isEmpty(Descripcion)) {
+			EditDescripcion.setError(getString(R.string.error_field_required));
+			focusView = EditDescripcion;
+			cancel = true;
+		} else {
+
+			cancel = false;
+		}
+		
+		if (TextUtils.isEmpty(Cupos)) {
+			EditCupos.setError(getString(R.string.error_field_required));
+			focusView = EditCupos;
+			cancel = true;
+		} else {
+
+			cancel = false;
+		}
+
+		if (cancel) {
+			// There was an error; don't attempt login and focus the first
+			// form field with an error.
+			focusView.requestFocus();
+		} else {
+			// Show a progress spinner, and kick off a background task to
+			// perform the user login attempt.
+			showProgress(true);
+			mCreateTask = new CreateEventTask();
+			mCreateTask.execute((Void) null);
+		}
+
+	}
+
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
 	private void showProgress(final boolean show) {
 		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -323,8 +376,9 @@ public class EventoActivity extends ListActivity {
 					.setListener(new AnimatorListenerAdapter() {
 						@Override
 						public void onAnimationEnd(Animator animation) {
-							mCreateEventStatusView.setVisibility(show ? View.VISIBLE
-									: View.GONE);
+							mCreateEventStatusView
+									.setVisibility(show ? View.VISIBLE
+											: View.GONE);
 						}
 					});
 
@@ -341,11 +395,12 @@ public class EventoActivity extends ListActivity {
 		} else {
 			// The ViewPropertyAnimator APIs are not available, so simply show
 			// and hide the relevant UI components.
-			mCreateEventStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+			mCreateEventStatusView.setVisibility(show ? View.VISIBLE
+					: View.GONE);
 			mCreateEventFormView.setVisibility(show ? View.GONE : View.VISIBLE);
 		}
 	}
-	
+
 	public class CreateEventTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
@@ -357,13 +412,12 @@ public class EventoActivity extends ListActivity {
 			 * } catch (InterruptedException e) { return false; }
 			 */
 			boolean exito = false;
-			EditNombre = (EditText)findViewById(R.id.edtNombre);
+			
 			Nombre = EditNombre.getText().toString();
-			EditDescripcion = (EditText)findViewById(R.id.edtDescripcion);
 			Descripcion = EditDescripcion.getText().toString();
-			EditCupos = (EditText)findViewById(R.id.edtCupos);
 			Cupos = EditCupos.getText().toString();
-			ArrayList parametros = new ArrayList();
+			ArrayList<String> parametros = new ArrayList<String>();
+
 			parametros.add("NombreEvento");
 			parametros.add(Nombre);
 			parametros.add("DescripcionEvento");
@@ -376,7 +430,7 @@ public class EventoActivity extends ListActivity {
 			parametros.add(user.get(SessionManager.KEY_NAME));
 			parametros.add("Asistentes");
 			parametros.add(asistentes);
-			
+
 			Log.d("LOG", parametros.toString());
 
 			JSONParseo jParseo = new JSONParseo();
@@ -398,13 +452,14 @@ public class EventoActivity extends ListActivity {
 						"error:" + error.getLocalizedMessage(),
 						Toast.LENGTH_LONG).show();
 			}
+
 			return exito;
+
 		}
 
 		@Override
 		protected void onPostExecute(final Boolean success) {
 
-			
 			Intent i = new Intent(EventoActivity.this, DrawableActivity.class);
 			startActivity(i);
 			showProgress(false);
@@ -412,13 +467,13 @@ public class EventoActivity extends ListActivity {
 				// finish();
 				showProgress(false);
 			} else {
-				//showProgress(false);
+				// showProgress(false);
 			}
 		}
 
 		@Override
 		protected void onCancelled() {
-			
+
 		}
 	}
 }

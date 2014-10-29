@@ -585,7 +585,7 @@ public class DrawableActivity extends Activity implements OnRefreshListener {
 				mGetUserTask = new TraeUserTask();
 				mGetUserTask.execute((Void) null);
 			} else {
-
+				
 			}
 		}
 

@@ -48,6 +48,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:ems="10"
+            android:hint="Biografia"
             android:inputType="textMultiLine" >
 
             <requestFocus />
